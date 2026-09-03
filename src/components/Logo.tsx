@@ -1,0 +1,33 @@
+export function Logo({ className = 'h-8 w-auto' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 480 200" className={className} xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rachaí">
+      <defs>
+        <linearGradient id="logo-g1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#14B8A6" />
+          <stop offset="100%" stopColor="#8B5CF6" />
+        </linearGradient>
+        <linearGradient id="logo-g2" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#8B5CF6" />
+          <stop offset="100%" stopColor="#14B8A6" />
+        </linearGradient>
+      </defs>
+      <g transform="translate(20,20)">
+        <circle cx="70" cy="80" r="62" fill="url(#logo-g1)" />
+        <circle cx="150" cy="80" r="62" fill="url(#logo-g2)" opacity="0.92" />
+        <rect x="106" y="8" width="8" height="144" rx="4" fill="var(--bg)" />
+        <circle cx="70" cy="80" r="10" fill="var(--bg)" opacity="0.85" />
+        <circle cx="150" cy="80" r="10" fill="var(--bg)" opacity="0.85" />
+      </g>
+      <text
+        x="215"
+        y="122"
+        fontFamily="Manrope, Inter, 'Segoe UI', sans-serif"
+        fontWeight="800"
+        fontSize="64"
+        className="fill-[var(--text)]"
+      >
+        rachaí
+      </text>
+    </svg>
+  );
+}
