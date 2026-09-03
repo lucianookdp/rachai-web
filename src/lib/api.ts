@@ -68,20 +68,20 @@ export interface Transfer {
 }
 
 export const api = {
-  createGroup: (name: string, pin: string) =>
-    request<{ code: string; name: string }>('/groups', {
+  createGroup: (name: string, pin: string, currency: string) =>
+    request<{ code: string; name: string; currency: string }>('/groups', {
       method: 'POST',
-      body: JSON.stringify({ name, pin }),
+      body: JSON.stringify({ name, pin, currency }),
     }),
 
   joinGroup: (code: string, pin: string) =>
-    request<{ token: string; name: string }>(`/groups/${code}/join`, {
+    request<{ token: string; name: string; currency: string }>(`/groups/${code}/join`, {
       method: 'POST',
       body: JSON.stringify({ pin }),
     }),
 
   getGroup: (code: string, token: string) =>
-    request<{ code: string; name: string; createdAt: string }>(`/groups/${code}`, {
+    request<{ code: string; name: string; currency: string; createdAt: string }>(`/groups/${code}`, {
       headers: authHeaders(token),
     }),
 
@@ -129,7 +129,7 @@ export interface DashboardStats {
   totalGroups: number;
   activeGroups: number;
   totalExpenses: number;
-  totalVolumeCents: number;
+  totalVolumeByCurrency: { currency: string; amountCents: number }[];
   groupsByDay: { day: string; count: number }[];
 }
 
@@ -137,6 +137,7 @@ export interface AdminGroupSummary {
   id: string;
   name: string;
   code: string;
+  currency: string;
   active: boolean;
   createdAt: string;
   _count: { participants: number; expenses: number };
@@ -173,9 +174,9 @@ export const adminApi = {
     }),
 };
 
-export function formatCents(cents: number, locale: string): string {
+export function formatCents(cents: number, currency: string, locale: string): string {
   return new Intl.NumberFormat(locale === 'pt' ? 'pt-BR' : 'en-US', {
     style: 'currency',
-    currency: locale === 'pt' ? 'BRL' : 'USD',
+    currency,
   }).format(cents / 100);
 }

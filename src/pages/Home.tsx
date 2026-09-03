@@ -4,18 +4,20 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '../components/Button';
 import { api, ApiError } from '../lib/api';
+import { CURRENCIES, guessDefaultCurrency } from '../lib/currencies';
 import { useGroupSession } from '../store/useGroupSession';
 
 type Tab = 'create' | 'join';
 
 export function Home() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const setSession = useGroupSession((s) => s.setSession);
 
   const [tab, setTab] = useState<Tab>('create');
   const [name, setName] = useState('');
   const [pin, setPin] = useState('');
+  const [currency, setCurrency] = useState<string>(() => guessDefaultCurrency(i18n.language));
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -26,9 +28,9 @@ export function Home() {
     setError(null);
     setLoading(true);
     try {
-      const group = await api.createGroup(name, pin);
+      const group = await api.createGroup(name, pin, currency);
       const { token } = await api.joinGroup(group.code, pin);
-      setSession({ code: group.code, name: group.name, token });
+      setSession({ code: group.code, name: group.name, currency: group.currency, token });
       setCreatedCode(group.code);
     } catch {
       setError(t('home.errorGeneric'));
@@ -43,8 +45,8 @@ export function Home() {
     setLoading(true);
     try {
       const upperCode = code.trim().toUpperCase();
-      const { token, name: groupName } = await api.joinGroup(upperCode, pin);
-      setSession({ code: upperCode, name: groupName, token });
+      const { token, name: groupName, currency: groupCurrency } = await api.joinGroup(upperCode, pin);
+      setSession({ code: upperCode, name: groupName, currency: groupCurrency, token });
       navigate(`/g/${upperCode}`);
     } catch (err) {
       setError(err instanceof ApiError && err.status === 401 ? t('home.errorInvalid') : t('home.errorGeneric'));
@@ -117,6 +119,15 @@ export function Home() {
               placeholder={t('home.pinPlaceholder')}
               className="input"
             />
+          </Field>
+          <Field label={t('home.currency')}>
+            <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="input">
+              {CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.code} — {c.name}
+                </option>
+              ))}
+            </select>
           </Field>
           {error && <p className="text-sm text-alert">{error}</p>}
           <Button type="submit" disabled={loading} className="w-full">

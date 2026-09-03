@@ -9,6 +9,7 @@
     "groupNamePlaceholder": "Viagem para Floripa",
     "pin": "PIN (4 a 6 dígitos)",
     "pinPlaceholder": "1234",
+    "currency": "Moeda",
     "code": "Código do grupo",
     "codePlaceholder": "ABC123",
     "createButton": "Criar grupo",
