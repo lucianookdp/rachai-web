@@ -9,6 +9,7 @@
     "groupNamePlaceholder": "Trip to the lake house",
     "pin": "PIN (4 to 6 digits)",
     "pinPlaceholder": "1234",
+    "currency": "Currency",
     "code": "Group code",
     "codePlaceholder": "ABC123",
     "createButton": "Create group",
