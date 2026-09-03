@@ -52,7 +52,16 @@ export function AdminDashboard() {
         <Stat label={t('admin.totalGroups')} value={stats.totalGroups} />
         <Stat label={t('admin.activeGroups')} value={stats.activeGroups} />
         <Stat label={t('admin.totalExpenses')} value={stats.totalExpenses} />
-        <Stat label={t('admin.totalVolume')} value={formatCents(stats.totalVolumeCents, i18n.language)} />
+        <Stat
+          label={t('admin.totalVolume')}
+          value={
+            stats.totalVolumeByCurrency.length === 0
+              ? formatCents(0, 'USD', i18n.language)
+              : stats.totalVolumeByCurrency
+                  .map((v) => formatCents(v.amountCents, v.currency, i18n.language))
+                  .join(' · ')
+          }
+        />
       </div>
 
       <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
@@ -64,6 +73,7 @@ export function AdminDashboard() {
                 <tr key={g.id} className="border-t border-[var(--border)]">
                   <td className="py-2 pr-3 font-medium">{g.name}</td>
                   <td className="py-2 pr-3 font-mono text-xs text-[var(--text-muted)]">{g.code}</td>
+                  <td className="py-2 pr-3 font-mono text-xs text-[var(--text-muted)]">{g.currency}</td>
                   <td className="py-2 pr-3 text-xs text-[var(--text-muted)]">
                     {g._count.participants} · {g._count.expenses}
                   </td>
