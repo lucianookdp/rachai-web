@@ -13,7 +13,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    // A Content-Type: application/json header with no body makes Fastify's
+    // JSON parser reject the request, so only send it when there is a body.
+    headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers },
   });
 
   if (!response.ok) {
