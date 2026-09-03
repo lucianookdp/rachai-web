@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" type="image/png" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#14B8A6" />
+
+    <title>Rachaí — divida contas, não amizades</title>
+    <meta
+      name="description"
+      content="Crie um grupo, lance as despesas da viagem, república ou churrasco e descubra em segundos quem deve pagar quem — sem cadastro."
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Rachaí" />
+    <meta property="og:title" content="Rachaí — divida contas, não amizades" />
+    <meta
+      property="og:description"
+      content="Crie um grupo, lance as despesas e descubra em segundos quem deve pagar quem — sem cadastro."
+    />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:locale" content="pt_BR" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Rachaí — divida contas, não amizades" />
+    <meta
+      name="twitter:description"
+      content="Crie um grupo, lance as despesas e descubra em segundos quem deve pagar quem — sem cadastro."
+    />
+    <meta name="twitter:image" content="/og-image.png" />
+
+    <script>
+      (function () {
+        var stored = localStorage.getItem('rachai-theme');
+        var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', dark);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
