@@ -17,6 +17,7 @@ export function GroupPage() {
   const [transfers, setTransfers] = useState<Transfer[]>([]);
   const [newParticipant, setNewParticipant] = useState('');
   const [showExpenseForm, setShowExpenseForm] = useState(false);
+  const currency = session.currency ?? 'USD';
 
   const load = useCallback(async () => {
     if (!session.token || !code) return;
@@ -78,7 +79,7 @@ export function GroupPage() {
                 <span className="font-medium">{b.name}</span>
                 <span className={b.amountCents >= 0 ? 'text-success font-semibold' : 'text-alert font-semibold'}>
                   {b.amountCents >= 0 ? t('group.youAreOwed') : t('group.youOwe')}{' '}
-                  {formatCents(Math.abs(b.amountCents), i18n.language)}
+                  {formatCents(Math.abs(b.amountCents), currency, i18n.language)}
                 </span>
               </li>
             ))}
@@ -95,7 +96,7 @@ export function GroupPage() {
                     {t('group.transferLine', {
                       from: tr.fromName,
                       to: tr.toName,
-                      amount: formatCents(tr.amountCents, i18n.language),
+                      amount: formatCents(tr.amountCents, currency, i18n.language),
                     })}
                   </span>
                   <Button variant="secondary" onClick={() => handleMarkPaid(tr)}>
@@ -166,7 +167,7 @@ export function GroupPage() {
                     <p className="text-xs text-[var(--text-muted)]">{payer?.name}</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="font-semibold">{formatCents(expense.amountCents, i18n.language)}</span>
+                    <span className="font-semibold">{formatCents(expense.amountCents, currency, i18n.language)}</span>
                     <button
                       type="button"
                       onClick={() => handleDeleteExpense(expense.id)}
