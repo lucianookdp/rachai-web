@@ -53,6 +53,7 @@
     "login": "Entrar",
     "email": "E-mail",
     "password": "Senha",
+    "errorInvalid": "E-mail ou senha inválidos.",
     "code": "Código de 6 dígitos",
     "verify": "Verificar",
     "dashboard": "Painel administrativo",

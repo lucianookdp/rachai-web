@@ -123,16 +123,6 @@ export const api = {
     }),
 };
 
-function readCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : null;
-}
-
-function csrfHeaders(): HeadersInit {
-  const token = readCookie('rachai_admin_csrf');
-  return token ? { 'X-CSRF-Token': token } : {};
-}
-
 export interface DashboardStats {
   totalGroups: number;
   activeGroups: number;
@@ -150,29 +140,34 @@ export interface AdminGroupSummary {
   _count: { participants: number; expenses: number };
 }
 
+// The admin frontend and API can end up on different domains, where a
+// cross-site cookie is silently dropped by the browser. The login response
+// also carries the session token so the client can send it as a bearer
+// token instead, which works regardless of domain.
 export const adminApi = {
   login: (email: string, password: string) =>
-    request<{ requiresTotp: boolean; tempToken?: string }>('/admin/auth/login', {
+    request<{ requiresTotp: boolean; tempToken?: string; token?: string }>('/admin/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     }),
 
   verifyTotp: (tempToken: string, code: string) =>
-    request<{ ok: true }>('/admin/auth/totp/verify', {
+    request<{ ok: true; token: string }>('/admin/auth/totp/verify', {
       method: 'POST',
       body: JSON.stringify({ tempToken, code }),
     }),
 
-  logout: () => request<{ ok: true }>('/admin/auth/logout', { method: 'POST', headers: csrfHeaders() }),
+  logout: (token: string) => request<{ ok: true }>('/admin/auth/logout', { method: 'POST', headers: authHeaders(token) }),
 
-  dashboardStats: () => request<DashboardStats>('/admin/dashboard/stats'),
+  dashboardStats: (token: string) => request<DashboardStats>('/admin/dashboard/stats', { headers: authHeaders(token) }),
 
-  dashboardGroups: () => request<AdminGroupSummary[]>('/admin/dashboard/groups'),
+  dashboardGroups: (token: string) =>
+    request<AdminGroupSummary[]>('/admin/dashboard/groups', { headers: authHeaders(token) }),
 
-  deactivateGroup: (id: string) =>
+  deactivateGroup: (token: string, id: string) =>
     request<{ code: string; active: boolean }>(`/admin/groups/${id}/deactivate`, {
       method: 'POST',
-      headers: csrfHeaders(),
+      headers: authHeaders(token),
     }),
 };
 
