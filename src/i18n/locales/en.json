@@ -53,6 +53,7 @@
     "login": "Log in",
     "email": "Email",
     "password": "Password",
+    "errorInvalid": "Invalid email or password.",
     "code": "6-digit code",
     "verify": "Verify",
     "dashboard": "Admin dashboard",

@@ -4,10 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Logo } from '../../components/Logo';
 import { adminApi, ApiError } from '../../lib/api';
+import { useAdminSession } from '../../store/useAdminSession';
 
 export function AdminLogin() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const setToken = useAdminSession((s) => s.setToken);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,11 +24,12 @@ export function AdminLogin() {
       const result = await adminApi.login(email, password);
       if (result.requiresTotp && result.tempToken) {
         setTempToken(result.tempToken);
-      } else {
+      } else if (result.token) {
+        setToken(result.token);
         navigate('/admin');
       }
     } catch {
-      setError(t('home.errorInvalid'));
+      setError(t('admin.errorInvalid'));
     }
   }
 
@@ -34,7 +37,8 @@ export function AdminLogin() {
     e.preventDefault();
     setError(null);
     try {
-      await adminApi.verifyTotp(tempToken!, code);
+      const result = await adminApi.verifyTotp(tempToken!, code);
+      setToken(result.token);
       navigate('/admin');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('home.errorGeneric'));

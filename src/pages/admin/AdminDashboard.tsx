@@ -3,30 +3,37 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { adminApi, formatCents, type AdminGroupSummary, type DashboardStats } from '../../lib/api';
+import { useAdminSession } from '../../store/useAdminSession';
 
 export function AdminDashboard() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { token, clearToken } = useAdminSession();
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [groups, setGroups] = useState<AdminGroupSummary[]>([]);
 
   useEffect(() => {
-    Promise.all([adminApi.dashboardStats(), adminApi.dashboardGroups()])
+    if (!token) {
+      navigate('/admin/login');
+      return;
+    }
+    Promise.all([adminApi.dashboardStats(token), adminApi.dashboardGroups(token)])
       .then(([s, g]) => {
         setStats(s);
         setGroups(g);
       })
       .catch(() => navigate('/admin/login'));
-  }, [navigate]);
+  }, [navigate, token]);
 
   async function handleDeactivate(id: string) {
-    await adminApi.deactivateGroup(id);
+    await adminApi.deactivateGroup(token!, id);
     setGroups((prev) => prev.map((g) => (g.id === id ? { ...g, active: false } : g)));
   }
 
   async function handleLogout() {
-    await adminApi.logout();
+    await adminApi.logout(token!);
+    clearToken();
     navigate('/admin/login');
   }
 
