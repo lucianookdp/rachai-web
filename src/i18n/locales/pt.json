@@ -1,0 +1,67 @@
+{
+  "app": {
+    "tagline": "Divida contas, não amizades."
+  },
+  "home": {
+    "createTab": "Criar grupo",
+    "joinTab": "Entrar em grupo",
+    "groupName": "Nome do grupo",
+    "groupNamePlaceholder": "Viagem para Floripa",
+    "pin": "PIN (4 a 6 dígitos)",
+    "pinPlaceholder": "1234",
+    "code": "Código do grupo",
+    "codePlaceholder": "ABC123",
+    "createButton": "Criar grupo",
+    "joinButton": "Entrar",
+    "createdTitle": "Grupo criado!",
+    "createdCode": "Guarde este código, você vai precisar dele para voltar:",
+    "continueButton": "Continuar para o grupo",
+    "errorGeneric": "Algo deu errado. Tente novamente.",
+    "errorInvalid": "Código ou PIN inválido."
+  },
+  "group": {
+    "participants": "Participantes",
+    "addParticipant": "Adicionar participante",
+    "namePlaceholder": "Nome",
+    "add": "Adicionar",
+    "expenses": "Despesas",
+    "addExpense": "Lançar despesa",
+    "description": "Descrição",
+    "descriptionPlaceholder": "Jantar, mercado, gasolina...",
+    "amount": "Valor",
+    "paidBy": "Quem pagou",
+    "splitAmong": "Dividir entre",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "balances": "Saldos",
+    "youOwe": "deve",
+    "youAreOwed": "tem a receber",
+    "settled": "Tudo quitado!",
+    "suggestedTransfers": "Transferências sugeridas",
+    "transferLine": "{{from}} paga {{amount}} para {{to}}",
+    "markAsPaid": "Marcar como pago",
+    "noExpensesYet": "Nenhuma despesa lançada ainda.",
+    "noParticipantsYet": "Adicione o primeiro participante para começar."
+  },
+  "header": {
+    "toggleTheme": "Alternar tema",
+    "changeLanguage": "Alterar idioma"
+  },
+  "admin": {
+    "login": "Entrar",
+    "email": "E-mail",
+    "password": "Senha",
+    "code": "Código de 6 dígitos",
+    "verify": "Verificar",
+    "dashboard": "Painel administrativo",
+    "totalGroups": "Grupos criados",
+    "activeGroups": "Grupos ativos (30 dias)",
+    "totalExpenses": "Despesas lançadas",
+    "totalVolume": "Volume processado",
+    "recentGroups": "Grupos recentes",
+    "deactivate": "Desativar",
+    "logout": "Sair"
+  }
+}

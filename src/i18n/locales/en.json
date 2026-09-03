@@ -1,0 +1,67 @@
+{
+  "app": {
+    "tagline": "Group expenses, sorted in seconds."
+  },
+  "home": {
+    "createTab": "Create group",
+    "joinTab": "Join group",
+    "groupName": "Group name",
+    "groupNamePlaceholder": "Trip to the lake house",
+    "pin": "PIN (4 to 6 digits)",
+    "pinPlaceholder": "1234",
+    "code": "Group code",
+    "codePlaceholder": "ABC123",
+    "createButton": "Create group",
+    "joinButton": "Join",
+    "createdTitle": "Group created!",
+    "createdCode": "Save this code, you'll need it to come back:",
+    "continueButton": "Continue to group",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "errorInvalid": "Invalid code or PIN."
+  },
+  "group": {
+    "participants": "Participants",
+    "addParticipant": "Add participant",
+    "namePlaceholder": "Name",
+    "add": "Add",
+    "expenses": "Expenses",
+    "addExpense": "Log expense",
+    "description": "Description",
+    "descriptionPlaceholder": "Dinner, groceries, gas...",
+    "amount": "Amount",
+    "paidBy": "Paid by",
+    "splitAmong": "Split among",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "balances": "Balances",
+    "youOwe": "owes",
+    "youAreOwed": "is owed",
+    "settled": "All settled up!",
+    "suggestedTransfers": "Suggested transfers",
+    "transferLine": "{{from}} pays {{amount}} to {{to}}",
+    "markAsPaid": "Mark as paid",
+    "noExpensesYet": "No expenses logged yet.",
+    "noParticipantsYet": "Add the first participant to get started."
+  },
+  "header": {
+    "toggleTheme": "Toggle theme",
+    "changeLanguage": "Change language"
+  },
+  "admin": {
+    "login": "Log in",
+    "email": "Email",
+    "password": "Password",
+    "code": "6-digit code",
+    "verify": "Verify",
+    "dashboard": "Admin dashboard",
+    "totalGroups": "Groups created",
+    "activeGroups": "Active groups (30 days)",
+    "totalExpenses": "Expenses logged",
+    "totalVolume": "Volume processed",
+    "recentGroups": "Recent groups",
+    "deactivate": "Deactivate",
+    "logout": "Log out"
+  }
+}
