@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+
+  --color-teal: #14b8a6;
+  --color-violet: #8b5cf6;
+  --color-success: #22c55e;
+  --color-alert: #f97316;
+}
+
+:root {
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --surface-2: #f2f0ec;
+  --border: #e7e4df;
+  --text: #1c1917;
+  --text-muted: #726c66;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0f0f12;
+  --surface: #18181b;
+  --surface-2: #1f1f24;
+  --border: #2c2c33;
+  --text: #f5f5f4;
+  --text-muted: #a5a19b;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  text-wrap: balance;
+}
+
+.brand-gradient-text {
+  background: linear-gradient(120deg, var(--color-teal), var(--color-violet));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@layer components {
+  .input {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 0.6rem 0.85rem;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+
+  .input:focus {
+    outline: 2px solid transparent;
+    border-color: var(--color-teal);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-teal) 20%, transparent);
+  }
+}
