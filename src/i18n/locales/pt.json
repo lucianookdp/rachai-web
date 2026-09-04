@@ -5,6 +5,8 @@
   "share": {
     "button": "Convidar pelo WhatsApp",
     "buttonShort": "Convidar",
+    "copy": "Copiar convite",
+    "copied": "Copiado",
     "pinHint": "O convite leva só o código. Mande o PIN em outra mensagem: separados, eles protegem o grupo de verdade.",
     "message": "*Rachaí*\nCriei o grupo *{{name}}* pra gente dividir as despesas.\n\nEntrar: {{url}}\nCódigo: *{{code}}*\n\nO PIN eu mando na sequência.\nNão precisa criar conta nem instalar app."
   },

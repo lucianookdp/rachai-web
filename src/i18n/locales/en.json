@@ -5,6 +5,8 @@
   "share": {
     "button": "Invite on WhatsApp",
     "buttonShort": "Invite",
+    "copy": "Copy invite",
+    "copied": "Copied",
     "pinHint": "The invite carries only the code. Send the PIN in a separate message: kept apart, they actually protect the group.",
     "message": "*Rachaí*\nI created the group *{{name}}* so we can split our expenses.\n\nJoin: {{url}}\nCode: *{{code}}*\n\nI'll send the PIN right after.\nNo sign-up, no app to install."
   },

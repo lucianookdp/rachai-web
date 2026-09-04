@@ -14,6 +14,7 @@ import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/Button';
+import { CopyInviteButton } from '../components/CopyInviteButton';
 import { WhatsAppShareButton } from '../components/WhatsAppShareButton';
 import { api, formatCents, type Balance, type Expense, type Participant, type Transfer } from '../lib/api';
 import { useGroupSession } from '../store/useGroupSession';
@@ -114,7 +115,10 @@ export function GroupPage() {
             )}
           </button>
         </div>
-        <WhatsAppShareButton groupName={session.name ?? ''} code={code} className="flex-none" />
+        <div className="flex flex-none items-center gap-2">
+          <CopyInviteButton groupName={session.name ?? ''} code={code} />
+          <WhatsAppShareButton groupName={session.name ?? ''} code={code} />
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_380px] lg:items-start">
