@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/Button';
+import { WhatsAppShareButton } from '../components/WhatsAppShareButton';
 import { api, formatCents, type Balance, type Expense, type Participant, type Transfer } from '../lib/api';
 import { useGroupSession } from '../store/useGroupSession';
 
@@ -67,7 +68,10 @@ export function GroupPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-8 space-y-8">
-      <h1 className="text-2xl font-extrabold">{session.name}</h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-2xl font-extrabold">{session.name}</h1>
+        <WhatsAppShareButton groupName={session.name ?? ''} code={code} compact />
+      </div>
 
       <Section title={t('group.balances')}>
         {balances.every((b) => b.amountCents === 0) ? (
