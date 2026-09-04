@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '../components/Button';
+import { CopyInviteButton } from '../components/CopyInviteButton';
 import { WhatsAppShareButton } from '../components/WhatsAppShareButton';
 import { api, ApiError } from '../lib/api';
 import { CURRENCIES, guessDefaultCurrency } from '../lib/currencies';
@@ -75,6 +76,7 @@ export function Home() {
         <p className="brand-gradient-text mt-4 text-4xl font-extrabold tracking-widest">{createdCode}</p>
 
         <WhatsAppShareButton groupName={name} code={createdCode} className="mt-6 w-full" />
+        <CopyInviteButton groupName={name} code={createdCode} className="mt-2 w-full" />
         <p className="mt-2 text-xs leading-snug text-[var(--text-muted)]">{t('share.pinHint')}</p>
 
         <Button variant="secondary" className="mt-4 w-full" onClick={() => navigate(`/g/${createdCode}`)}>
