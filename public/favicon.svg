@@ -2,16 +2,20 @@
   <defs>
     <linearGradient id="mg1" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#14B8A6"/>
-      <stop offset="100%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#0D9488"/>
     </linearGradient>
     <linearGradient id="mg2" x1="100%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#8B5CF6"/>
-      <stop offset="100%" stop-color="#14B8A6"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
     </linearGradient>
+    <clipPath id="mcrack-left">
+      <path d="M0 0 H100 L60 90 L140 110 L100 200 H0 Z"/>
+    </clipPath>
+    <clipPath id="mcrack-right">
+      <path d="M200 0 H100 L60 90 L140 110 L100 200 H200 Z"/>
+    </clipPath>
   </defs>
-  <circle cx="70" cy="100" r="62" fill="url(#mg1)"/>
-  <circle cx="130" cy="100" r="62" fill="url(#mg2)" opacity="0.92"/>
-  <rect x="96" y="28" width="8" height="144" rx="4" fill="#FAFAF9"/>
-  <circle cx="70" cy="100" r="10" fill="#FAFAF9" opacity="0.85"/>
-  <circle cx="130" cy="100" r="10" fill="#FAFAF9" opacity="0.85"/>
+  <circle cx="100" cy="100" r="94" fill="url(#mg1)" clip-path="url(#mcrack-left)"/>
+  <circle cx="100" cy="100" r="94" fill="url(#mg2)" clip-path="url(#mcrack-right)"/>
+  <circle cx="100" cy="100" r="94" fill="none" stroke="#FAFAF9" stroke-width="3"/>
 </svg>
