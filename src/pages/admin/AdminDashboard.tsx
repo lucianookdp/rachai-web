@@ -83,7 +83,7 @@ export function AdminDashboard() {
                         {t('admin.deactivate')}
                       </button>
                     ) : (
-                      <span className="text-xs text-[var(--text-muted)]">—</span>
+                      <span className="text-xs text-[var(--text-muted)]">·</span>
                     )}
                   </td>
                 </tr>

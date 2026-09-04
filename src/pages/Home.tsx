@@ -1,3 +1,4 @@
+import { CircleDollarSign, MessageCircle, Zap } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -151,7 +152,7 @@ export function Home() {
                 <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="input">
                   {CURRENCIES.map((c) => (
                     <option key={c.code} value={c.code}>
-                      {c.code} — {c.name}
+                      {c.code} · {c.name}
                     </option>
                   ))}
                 </select>
@@ -196,14 +197,14 @@ export function Home() {
         <div className="mx-auto grid max-w-6xl gap-8 px-5 py-12 sm:px-8 md:grid-cols-3 md:gap-6 md:py-14">
           {(
             [
-              { icon: BoltIcon, title: t('home.feature1Title'), desc: t('home.feature1Desc') },
-              { icon: CoinIcon, title: t('home.feature2Title'), desc: t('home.feature2Desc') },
-              { icon: ChatIcon, title: t('home.feature3Title'), desc: t('home.feature3Desc') },
+              { icon: Zap, title: t('home.feature1Title'), desc: t('home.feature1Desc') },
+              { icon: CircleDollarSign, title: t('home.feature2Title'), desc: t('home.feature2Desc') },
+              { icon: MessageCircle, title: t('home.feature3Title'), desc: t('home.feature3Desc') },
             ] as const
           ).map(({ icon: Icon, title, desc }) => (
             <div key={title}>
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal/10 text-teal">
-                <Icon />
+                <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
               </div>
               <h3 className="mt-3 font-display text-[15px] font-bold">{title}</h3>
               <p className="mt-1 text-sm leading-relaxed text-[var(--text-muted)]">{desc}</p>
@@ -212,38 +213,6 @@ export function Home() {
         </div>
       </div>
     </div>
-  );
-}
-
-function BoltIcon() {
-  return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className="h-[18px] w-[18px]">
-      <path d="M11 2 4 12h5l-1 6 7-10h-5l1-6z" />
-    </svg>
-  );
-}
-
-function CoinIcon() {
-  return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className="h-[18px] w-[18px]">
-      <path
-        fillRule="evenodd"
-        d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.75a.75.75 0 00-1.5 0v.163a2.75 2.75 0 00-1.977 4.517c.42.44.99.71 1.602.836l.875.18v2.02a1.25 1.25 0 01-.9-1.05.75.75 0 00-1.487.166A2.75 2.75 0 009.25 16.59v.16a.75.75 0 001.5 0v-.163a2.75 2.75 0 001.977-4.517 2.73 2.73 0 00-1.602-.836l-.875-.18V8.99c.415.145.75.485.9 1.05a.75.75 0 101.487-.166 2.75 2.75 0 00-2.387-2.09v-.16z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
-}
-
-function ChatIcon() {
-  return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className="h-[18px] w-[18px]">
-      <path
-        fillRule="evenodd"
-        d="M2 5a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2h-6.586l-3.707 3.707A1 1 0 014 18v-3H4a2 2 0 01-2-2V5z"
-        clipRule="evenodd"
-      />
-    </svg>
   );
 }
 
