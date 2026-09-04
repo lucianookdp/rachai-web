@@ -3,16 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <!--
-      GitHub Pages serves static files with no way to set custom HTTP
-      response headers, so this is enforced via a meta tag instead. That
-      also means X-Frame-Options / frame-ancestors can't be set at all here
-      (browsers only honor those as real headers) — moving to a host that
-      allows custom headers (or fronting this with Cloudflare) would close
-      that gap.
+      This meta CSP is a fallback for whichever deployment can't set real HTTP
+      headers (GitHub Pages can't at all). The Hostinger deploy sets a proper
+      CSP header via public/.htaccess instead — browsers enforce the
+      intersection of both, so connect-src lists every API this app has
+      talked to across deployments, not just the current one's.
     -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://rachai-api-production.up.railway.app; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+      content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://rachai-api-production.up.railway.app https://api.userachai.com.br; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
     />
     <script src="/spa-redirect-restore.js"></script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
