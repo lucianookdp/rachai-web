@@ -186,33 +186,6 @@ export function GroupPage() {
               </div>
             )}
           </Section>
-
-          <Section icon={Users} title={t('group.participants')}>
-            {participants.length === 0 ? (
-              <p className="text-[var(--text-muted)]">{t('group.noParticipantsYet')}</p>
-            ) : (
-              <ul className="flex flex-wrap gap-2">
-                {participants.map((p) => (
-                  <li key={p.id} className="flex items-center gap-2 rounded-full bg-[var(--surface-2)] py-1 pl-1 pr-3">
-                    <Avatar name={p.name} size="sm" />
-                    <span className="text-sm font-medium">{p.name}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <form onSubmit={handleAddParticipant} className="mt-4 flex gap-2">
-              <input
-                value={newParticipant}
-                onChange={(e) => setNewParticipant(e.target.value)}
-                placeholder={t('group.namePlaceholder')}
-                className="input"
-              />
-              <Button type="submit" className="inline-flex flex-none items-center gap-1.5">
-                <Plus className="h-4 w-4" />
-                {t('group.add')}
-              </Button>
-            </form>
-          </Section>
         </div>
 
         <div className="lg:order-1">
@@ -279,6 +252,35 @@ export function GroupPage() {
             )}
           </Section>
         </div>
+      </div>
+
+      <div className="mt-6">
+        <Section icon={Users} title={t('group.participants')}>
+          {participants.length === 0 ? (
+            <p className="text-[var(--text-muted)]">{t('group.noParticipantsYet')}</p>
+          ) : (
+            <ul className="flex flex-wrap gap-2">
+              {participants.map((p) => (
+                <li key={p.id} className="flex items-center gap-2 rounded-full bg-[var(--surface-2)] py-1 pl-1 pr-3">
+                  <Avatar name={p.name} size="sm" />
+                  <span className="text-sm font-medium">{p.name}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <form onSubmit={handleAddParticipant} className="mt-4 flex max-w-sm gap-2">
+            <input
+              value={newParticipant}
+              onChange={(e) => setNewParticipant(e.target.value)}
+              placeholder={t('group.namePlaceholder')}
+              className="input"
+            />
+            <Button type="submit" className="inline-flex flex-none items-center gap-1.5">
+              <Plus className="h-4 w-4" />
+              {t('group.add')}
+            </Button>
+          </form>
+        </Section>
       </div>
     </div>
   );
@@ -399,12 +401,14 @@ function ExpenseForm({
                 type="button"
                 key={p.id}
                 onClick={() => toggleParticipant(p.id)}
-                className={`inline-flex items-center gap-1.5 rounded-full py-1 pl-1 pr-3 text-sm font-medium transition-colors ${
-                  selected ? 'bg-gradient-to-r from-teal to-violet text-white' : 'border border-[var(--border)] bg-[var(--surface)]'
+                className={`inline-flex items-center gap-1.5 rounded-full border py-1 pl-1 pr-3 text-sm font-medium transition-colors ${
+                  selected
+                    ? 'border-teal bg-teal/10 text-teal'
+                    : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text)]'
                 }`}
               >
                 {selected ? (
-                  <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-white/25">
+                  <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-teal text-white">
                     <Check className="h-3.5 w-3.5" />
                   </span>
                 ) : (
