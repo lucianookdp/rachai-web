@@ -2,20 +2,24 @@
   <defs>
     <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#14B8A6"/>
-      <stop offset="100%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#0D9488"/>
     </linearGradient>
     <linearGradient id="g2" x1="100%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#8B5CF6"/>
-      <stop offset="100%" stop-color="#14B8A6"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
     </linearGradient>
+    <clipPath id="crack-left">
+      <path d="M0 0 H100 L60 90 L140 110 L100 188 H0 Z"/>
+    </clipPath>
+    <clipPath id="crack-right">
+      <path d="M200 0 H100 L60 90 L140 110 L100 188 H200 Z"/>
+    </clipPath>
   </defs>
 
-  <g transform="translate(20,20)">
-    <circle cx="70" cy="80" r="62" fill="url(#g1)"/>
-    <circle cx="150" cy="80" r="62" fill="url(#g2)" opacity="0.92"/>
-    <rect x="106" y="8" width="8" height="144" rx="4" fill="#FAFAF9"/>
-    <circle cx="70" cy="80" r="10" fill="#FAFAF9" opacity="0.85"/>
-    <circle cx="150" cy="80" r="10" fill="#FAFAF9" opacity="0.85"/>
+  <g transform="translate(20,4)">
+    <circle cx="100" cy="100" r="88" fill="url(#g1)" clip-path="url(#crack-left)"/>
+    <circle cx="100" cy="100" r="88" fill="url(#g2)" clip-path="url(#crack-right)"/>
+    <circle cx="100" cy="100" r="88" fill="none" stroke="#FAFAF9" stroke-width="3"/>
   </g>
 
   <text x="215" y="122" font-family="Manrope, Inter, 'Segoe UI', sans-serif" font-weight="800" font-size="64" fill="#1C1917">
