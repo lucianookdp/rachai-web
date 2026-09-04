@@ -1,21 +1,10 @@
 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="mg1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#14B8A6"/>
-      <stop offset="100%" stop-color="#0D9488"/>
-    </linearGradient>
-    <linearGradient id="mg2" x1="100%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#8B5CF6"/>
-      <stop offset="100%" stop-color="#6D28D9"/>
-    </linearGradient>
-    <clipPath id="mcrack-left">
-      <path d="M0 0 H100 L60 90 L140 110 L100 200 H0 Z"/>
-    </clipPath>
-    <clipPath id="mcrack-right">
-      <path d="M200 0 H100 L60 90 L140 110 L100 200 H200 Z"/>
-    </clipPath>
-  </defs>
-  <circle cx="100" cy="100" r="94" fill="url(#mg1)" clip-path="url(#mcrack-left)"/>
-  <circle cx="100" cy="100" r="94" fill="url(#mg2)" clip-path="url(#mcrack-right)"/>
-  <circle cx="100" cy="100" r="94" fill="none" stroke="#FAFAF9" stroke-width="3"/>
+  <path
+    d="M36 20 H164 A12 12 0 0 1 176 32 V76 L148 64 L124 80 L100 64 L76 80 L52 64 L24 76 V32 A12 12 0 0 1 36 20 Z"
+    fill="#14B8A6"
+  />
+  <path
+    d="M24 124 L52 136 L76 120 L100 136 L124 120 L148 136 L176 124 V168 A12 12 0 0 1 164 180 H36 A12 12 0 0 1 24 168 Z"
+    fill="#8B5CF6"
+  />
 </svg>
