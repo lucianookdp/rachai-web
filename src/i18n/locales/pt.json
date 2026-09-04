@@ -9,6 +9,18 @@
     "message": "*Rachaí* 🧾\nCriei o grupo *{{name}}* pra gente dividir as despesas.\n\nEntrar: {{url}}\nCódigo: *{{code}}*\n\nO PIN eu mando na sequência 🔒\nNão precisa criar conta nem instalar app."
   },
   "home": {
+    "heroTitle1": "Divida contas.",
+    "heroTitle2": "Não amizades.",
+    "heroLede": "Crie um grupo, lance as despesas da viagem e descubra em segundos quem paga quem — em qualquer moeda, sem ninguém precisar instalar nada.",
+    "trustSignup": "Sem cadastro",
+    "trustCurrencies": "55 moedas",
+    "trustWhatsapp": "Convite no WhatsApp",
+    "feature1Title": "Rateio automático",
+    "feature1Desc": "Divide igual entre todo mundo e já sugere as transferências mínimas pra fechar a conta.",
+    "feature2Title": "Sua moeda, não a nossa",
+    "feature2Desc": "Real, dólar, euro ou qualquer uma das 55 moedas — o grupo escolhe na hora de criar.",
+    "feature3Title": "Chama no WhatsApp",
+    "feature3Desc": "Convite já formatado, com código e link — o PIN vai separado, por segurança.",
     "createTab": "Criar grupo",
     "joinTab": "Entrar em grupo",
     "groupName": "Nome do grupo",

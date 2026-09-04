@@ -9,6 +9,18 @@
     "message": "*Rachaí* 🧾\nI created the group *{{name}}* so we can split our expenses.\n\nJoin: {{url}}\nCode: *{{code}}*\n\nI'll send the PIN right after 🔒\nNo sign-up, no app to install."
   },
   "home": {
+    "heroTitle1": "Split bills.",
+    "heroTitle2": "Not friendships.",
+    "heroLede": "Create a group, log the trip's expenses, and find out in seconds who pays whom — in any currency, with nobody having to install anything.",
+    "trustSignup": "No sign-up",
+    "trustCurrencies": "55 currencies",
+    "trustWhatsapp": "Invite on WhatsApp",
+    "feature1Title": "Automatic splitting",
+    "feature1Desc": "Splits evenly across everyone and already suggests the minimum transfers to settle up.",
+    "feature2Title": "Your currency, not ours",
+    "feature2Desc": "Dollars, euros, reais, or any of 55 currencies — the group picks it when it's created.",
+    "feature3Title": "Invite over WhatsApp",
+    "feature3Desc": "A ready-made invite with the code and link — the PIN goes separately, for security.",
     "createTab": "Create group",
     "joinTab": "Join group",
     "groupName": "Group name",
