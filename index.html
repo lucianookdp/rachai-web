@@ -2,23 +2,19 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <script>
-      // Counterpart to public/404.html: restores the real path that GitHub
-      // Pages redirected here as a query string, before React Router reads
-      // the location.
-      (function (l) {
-        if (l.search[1] === '/') {
-          var decoded = l.search
-            .slice(1)
-            .split('&')
-            .map(function (s) {
-              return s.replace(/~and~/g, '&');
-            })
-            .join('?');
-          window.history.replaceState(null, '', l.pathname.slice(0, -1) + decoded + l.hash);
-        }
-      })(window.location);
-    </script>
+    <!--
+      GitHub Pages serves static files with no way to set custom HTTP
+      response headers, so this is enforced via a meta tag instead. That
+      also means X-Frame-Options / frame-ancestors can't be set at all here
+      (browsers only honor those as real headers) — moving to a host that
+      allows custom headers (or fronting this with Cloudflare) would close
+      that gap.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://rachai-api-production.up.railway.app; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+    />
+    <script src="/spa-redirect-restore.js"></script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate icon" type="image/png" href="/favicon-32.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -49,13 +45,7 @@
     />
     <meta name="twitter:image" content="/og-image.png" />
 
-    <script>
-      (function () {
-        var stored = localStorage.getItem('rachai-theme');
-        var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.classList.toggle('dark', dark);
-      })();
-    </script>
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>
