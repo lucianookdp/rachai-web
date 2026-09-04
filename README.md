@@ -1,7 +1,8 @@
 # Rachai Web
 
-Frontend for Rachai, a group bill-splitting app. Create a group, share the
-code and PIN, log expenses together, and see who owes whom.
+Frontend for Rachai, a group bill-splitting app. Create a group in the
+currency of your choice, share the code and PIN, log expenses together, and
+see who owes whom.
 
 ## Stack
 
@@ -32,6 +33,8 @@ npm test
 
 ## Deployment
 
-Built as a static site and deployed to GitHub Pages via GitHub Actions. Set
-`VITE_API_URL` (and `VITE_BASE_PATH` if served from a subpath) as repository
-variables before deploying.
+Built as a static site and deployed to GitHub Pages via GitHub Actions:
+**https://lucianookdp.github.io/rachai-web/**
+
+`VITE_API_URL` and `VITE_BASE_PATH` are set as repository variables and read
+by the deploy workflow at build time.
