@@ -84,96 +84,166 @@ export function Home() {
   }
 
   return (
-    <div className="mx-auto mt-12 max-w-sm px-5">
-      <div className="text-center">
-        <h1 className="text-3xl font-extrabold">
-          rachaí<span className="brand-gradient-text">.</span>
-        </h1>
-        <p className="mt-2 text-[var(--text-muted)]">{t('app.tagline')}</p>
+    <div>
+      <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-10 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-20">
+        <div className="text-center lg:text-left">
+          <h1 className="text-3xl font-extrabold leading-[1.1] text-balance sm:text-4xl lg:text-5xl">
+            {t('home.heroTitle1')}
+            <br />
+            <span className="brand-gradient-text">{t('home.heroTitle2')}</span>
+          </h1>
+          <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-[var(--text-muted)] lg:mx-0">
+            {t('home.heroLede')}
+          </p>
+          <ul className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 lg:justify-start">
+            {[t('home.trustSignup'), t('home.trustCurrencies'), t('home.trustWhatsapp')].map((item) => (
+              <li key={item} className="flex items-center gap-1.5 text-sm text-[var(--text-muted)]">
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 flex-none text-success">
+                  <path d="M16.7 5.3a1 1 0 010 1.4l-7.4 7.4a1 1 0 01-1.4 0L3.3 9.5a1 1 0 111.4-1.4l3.6 3.6 6.7-6.7a1 1 0 011.4 0z" />
+                </svg>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mx-auto w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+          <div className="flex rounded-xl border border-[var(--border)] p-1">
+            <button
+              type="button"
+              onClick={() => setTab('create')}
+              className={`flex-1 rounded-lg py-2 text-sm font-semibold transition-colors ${tab === 'create' ? 'bg-[var(--surface-2)]' : 'text-[var(--text-muted)]'}`}
+            >
+              {t('home.createTab')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab('join')}
+              className={`flex-1 rounded-lg py-2 text-sm font-semibold transition-colors ${tab === 'join' ? 'bg-[var(--surface-2)]' : 'text-[var(--text-muted)]'}`}
+            >
+              {t('home.joinTab')}
+            </button>
+          </div>
+
+          {tab === 'create' ? (
+            <form onSubmit={handleCreate} className="mt-6 space-y-4">
+              <Field label={t('home.groupName')}>
+                <input
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={t('home.groupNamePlaceholder')}
+                  className="input"
+                />
+              </Field>
+              <Field label={t('home.pin')}>
+                <input
+                  required
+                  inputMode="numeric"
+                  pattern="\d{4,6}"
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value)}
+                  placeholder={t('home.pinPlaceholder')}
+                  className="input"
+                />
+              </Field>
+              <Field label={t('home.currency')}>
+                <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="input">
+                  {CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.code} — {c.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              {error && <p className="text-sm text-alert">{error}</p>}
+              <Button type="submit" disabled={loading} className="w-full">
+                {t('home.createButton')}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleJoin} className="mt-6 space-y-4">
+              <Field label={t('home.code')}>
+                <input
+                  required
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder={t('home.codePlaceholder')}
+                  className="input uppercase"
+                />
+              </Field>
+              <Field label={t('home.pin')}>
+                <input
+                  required
+                  inputMode="numeric"
+                  pattern="\d{4,6}"
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value)}
+                  placeholder={t('home.pinPlaceholder')}
+                  className="input"
+                />
+              </Field>
+              {error && <p className="text-sm text-alert">{error}</p>}
+              <Button type="submit" disabled={loading} className="w-full">
+                {t('home.joinButton')}
+              </Button>
+            </form>
+          )}
+        </div>
       </div>
 
-      <div className="mt-8 flex rounded-xl border border-[var(--border)] p-1">
-        <button
-          type="button"
-          onClick={() => setTab('create')}
-          className={`flex-1 rounded-lg py-2 text-sm font-semibold transition-colors ${tab === 'create' ? 'bg-[var(--surface-2)]' : 'text-[var(--text-muted)]'}`}
-        >
-          {t('home.createTab')}
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab('join')}
-          className={`flex-1 rounded-lg py-2 text-sm font-semibold transition-colors ${tab === 'join' ? 'bg-[var(--surface-2)]' : 'text-[var(--text-muted)]'}`}
-        >
-          {t('home.joinTab')}
-        </button>
+      <div className="border-t border-[var(--border)]">
+        <div className="mx-auto grid max-w-6xl gap-8 px-5 py-12 sm:px-8 md:grid-cols-3 md:gap-6 md:py-14">
+          {(
+            [
+              { icon: BoltIcon, title: t('home.feature1Title'), desc: t('home.feature1Desc') },
+              { icon: CoinIcon, title: t('home.feature2Title'), desc: t('home.feature2Desc') },
+              { icon: ChatIcon, title: t('home.feature3Title'), desc: t('home.feature3Desc') },
+            ] as const
+          ).map(({ icon: Icon, title, desc }) => (
+            <div key={title}>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal/10 text-teal">
+                <Icon />
+              </div>
+              <h3 className="mt-3 font-display text-[15px] font-bold">{title}</h3>
+              <p className="mt-1 text-sm leading-relaxed text-[var(--text-muted)]">{desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
-
-      {tab === 'create' ? (
-        <form onSubmit={handleCreate} className="mt-6 space-y-4">
-          <Field label={t('home.groupName')}>
-            <input
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('home.groupNamePlaceholder')}
-              className="input"
-            />
-          </Field>
-          <Field label={t('home.pin')}>
-            <input
-              required
-              inputMode="numeric"
-              pattern="\d{4,6}"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              placeholder={t('home.pinPlaceholder')}
-              className="input"
-            />
-          </Field>
-          <Field label={t('home.currency')}>
-            <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="input">
-              {CURRENCIES.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.code} — {c.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-          {error && <p className="text-sm text-alert">{error}</p>}
-          <Button type="submit" disabled={loading} className="w-full">
-            {t('home.createButton')}
-          </Button>
-        </form>
-      ) : (
-        <form onSubmit={handleJoin} className="mt-6 space-y-4">
-          <Field label={t('home.code')}>
-            <input
-              required
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder={t('home.codePlaceholder')}
-              className="input uppercase"
-            />
-          </Field>
-          <Field label={t('home.pin')}>
-            <input
-              required
-              inputMode="numeric"
-              pattern="\d{4,6}"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              placeholder={t('home.pinPlaceholder')}
-              className="input"
-            />
-          </Field>
-          {error && <p className="text-sm text-alert">{error}</p>}
-          <Button type="submit" disabled={loading} className="w-full">
-            {t('home.joinButton')}
-          </Button>
-        </form>
-      )}
     </div>
+  );
+}
+
+function BoltIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="h-[18px] w-[18px]">
+      <path d="M11 2 4 12h5l-1 6 7-10h-5l1-6z" />
+    </svg>
+  );
+}
+
+function CoinIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="h-[18px] w-[18px]">
+      <path
+        fillRule="evenodd"
+        d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.75a.75.75 0 00-1.5 0v.163a2.75 2.75 0 00-1.977 4.517c.42.44.99.71 1.602.836l.875.18v2.02a1.25 1.25 0 01-.9-1.05.75.75 0 00-1.487.166A2.75 2.75 0 009.25 16.59v.16a.75.75 0 001.5 0v-.163a2.75 2.75 0 001.977-4.517 2.73 2.73 0 00-1.602-.836l-.875-.18V8.99c.415.145.75.485.9 1.05a.75.75 0 101.487-.166 2.75 2.75 0 00-2.387-2.09v-.16z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="h-[18px] w-[18px]">
+      <path
+        fillRule="evenodd"
+        d="M2 5a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2h-6.586l-3.707 3.707A1 1 0 014 18v-3H4a2 2 0 01-2-2V5z"
+        clipRule="evenodd"
+      />
+    </svg>
   );
 }
 
