@@ -1,0 +1,39 @@
+name: Deploy to Hostinger
+
+# Hostinger's Git deploy publishes a branch's files as-is, with no build
+# step of its own. This job runs the real build (with this deployment's own
+# base path and API URL, since it's served from the domain root rather than
+# a /rachai-web/ subpath) and pushes only the built output to a dedicated
+# branch — no secrets needed, just the token GitHub Actions already has.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run build
+        env:
+          VITE_API_URL: https://api.userachai.com.br
+          VITE_BASE_PATH: /
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: hostinger
+          force_orphan: true
