@@ -1,10 +1,12 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '../components/Button';
+import { WhatsAppShareButton } from '../components/WhatsAppShareButton';
 import { api, ApiError } from '../lib/api';
 import { CURRENCIES, guessDefaultCurrency } from '../lib/currencies';
+import { sanitizeGroupCode } from '../lib/share';
 import { useGroupSession } from '../store/useGroupSession';
 
 type Tab = 'create' | 'join';
@@ -14,11 +16,16 @@ export function Home() {
   const navigate = useNavigate();
   const setSession = useGroupSession((s) => s.setSession);
 
-  const [tab, setTab] = useState<Tab>('create');
+  // An invite link carries the group code, so open straight on the join tab
+  // with it filled in — only the PIN is left to type.
+  const [searchParams] = useSearchParams();
+  const invitedCode = sanitizeGroupCode(searchParams.get('c'));
+
+  const [tab, setTab] = useState<Tab>(invitedCode ? 'join' : 'create');
   const [name, setName] = useState('');
   const [pin, setPin] = useState('');
   const [currency, setCurrency] = useState<string>(() => guessDefaultCurrency(i18n.language));
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(invitedCode);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [createdCode, setCreatedCode] = useState<string | null>(null);
@@ -65,7 +72,11 @@ export function Home() {
         <h1 className="text-2xl font-bold">{t('home.createdTitle')}</h1>
         <p className="mt-2 text-sm text-[var(--text-muted)]">{t('home.createdCode')}</p>
         <p className="brand-gradient-text mt-4 text-4xl font-extrabold tracking-widest">{createdCode}</p>
-        <Button className="mt-6 w-full" onClick={() => navigate(`/g/${createdCode}`)}>
+
+        <WhatsAppShareButton groupName={name} code={createdCode} className="mt-6 w-full" />
+        <p className="mt-2 text-xs leading-snug text-[var(--text-muted)]">{t('share.pinHint')}</p>
+
+        <Button variant="secondary" className="mt-4 w-full" onClick={() => navigate(`/g/${createdCode}`)}>
           {t('home.continueButton')}
         </Button>
       </motion.div>
