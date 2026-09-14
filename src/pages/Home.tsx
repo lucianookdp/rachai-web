@@ -43,8 +43,8 @@ export function Home() {
     setLoading(true);
     try {
       const group = await api.createGroup(name, pin, currency);
-      const { token } = await api.joinGroup(group.code, pin);
-      setSession({ code: group.code, name: group.name, currency: group.currency, token });
+      const { token, role } = await api.joinGroup(group.code, pin);
+      setSession({ code: group.code, name: group.name, currency: group.currency, token, role });
       setCreatedCode(group.code);
     } catch {
       setError(t('home.errorGeneric'));
@@ -59,11 +59,14 @@ export function Home() {
     setLoading(true);
     try {
       const upperCode = code.trim().toUpperCase();
-      const { token, name: groupName, currency: groupCurrency } = await api.joinGroup(upperCode, pin);
-      setSession({ code: upperCode, name: groupName, currency: groupCurrency, token });
+      const { token, name: groupName, currency: groupCurrency, role } = pin.trim()
+        ? await api.joinGroup(upperCode, pin)
+        : await api.viewGroup(upperCode);
+      setSession({ code: upperCode, name: groupName, currency: groupCurrency, token, role });
       navigate(`/g/${upperCode}`);
     } catch (err) {
-      setError(err instanceof ApiError && err.status === 401 ? t('home.errorInvalid') : t('home.errorGeneric'));
+      const isInvalid = err instanceof ApiError && (err.status === 401 || err.status === 404);
+      setError(isInvalid ? t('home.errorInvalid') : t('home.errorGeneric'));
     } finally {
       setLoading(false);
     }
@@ -180,9 +183,8 @@ export function Home() {
                   className="input uppercase"
                 />
               </Field>
-              <Field label={t('home.pin')}>
+              <Field label={t('home.joinPin')} hint={t('home.joinPinHint')}>
                 <input
-                  required
                   inputMode="numeric"
                   pattern="\d{4,6}"
                   value={pin}
@@ -193,7 +195,7 @@ export function Home() {
               </Field>
               {error && <p className="text-sm text-alert">{error}</p>}
               <Button type="submit" disabled={loading} className="w-full">
-                {t('home.joinButton')}
+                {pin.trim() ? t('home.joinButton') : t('home.viewButton')}
               </Button>
             </form>
           )}

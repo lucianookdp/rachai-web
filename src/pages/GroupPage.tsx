@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   Copy,
   Download,
+  Eye,
   Pencil,
   Plus,
   Receipt,
@@ -111,11 +112,27 @@ export function GroupPage() {
 
   if (!code) return null;
 
+  const canEdit = session.role === 'editor';
   const isSettled = balances.every((b) => b.amountCents === 0);
   const totalCents = expenses.reduce((sum, e) => sum + e.amountCents, 0);
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
+      {!canEdit && (
+        <UnlockBanner
+          code={code}
+          onUnlock={(result) =>
+            session.setSession({
+              code,
+              name: result.name,
+              currency: result.currency,
+              token: result.token,
+              role: result.role,
+            })
+          }
+        />
+      )}
+
       <div className="mb-6 flex flex-col gap-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
@@ -194,13 +211,15 @@ export function GroupPage() {
                       </div>
                       <div className="mt-2.5 flex items-center justify-between gap-2">
                         <span className="font-bold">{formatCents(tr.amountCents, currency, i18n.language)}</span>
-                        <Button
-                          variant="secondary"
-                          className="px-3 py-1.5 text-xs"
-                          onClick={() => handleMarkPaid(tr)}
-                        >
-                          {t('group.markAsPaid')}
-                        </Button>
+                        {canEdit && (
+                          <Button
+                            variant="secondary"
+                            className="px-3 py-1.5 text-xs"
+                            onClick={() => handleMarkPaid(tr)}
+                          >
+                            {t('group.markAsPaid')}
+                          </Button>
+                        )}
                       </div>
                     </li>
                   ))}
@@ -227,7 +246,7 @@ export function GroupPage() {
                     {t('group.export')}
                   </Button>
                 )}
-                {participants.length >= 1 && (
+                {canEdit && participants.length >= 1 && (
                   <Button
                     variant="secondary"
                     className="inline-flex items-center gap-1.5"
@@ -296,24 +315,28 @@ export function GroupPage() {
                       <span className="flex-none font-bold">
                         {formatCents(expense.amountCents, currency, i18n.language)}
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => setExpenseFormTarget(expense)}
-                        aria-label={t('group.edit')}
-                        title={t('group.edit')}
-                        className="flex-none rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteExpense(expense.id)}
-                        aria-label={t('group.delete')}
-                        title={t('group.delete')}
-                        className="flex-none rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-alert/10 hover:text-alert"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      {canEdit && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setExpenseFormTarget(expense)}
+                            aria-label={t('group.edit')}
+                            title={t('group.edit')}
+                            className="flex-none rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteExpense(expense.id)}
+                            aria-label={t('group.delete')}
+                            title={t('group.delete')}
+                            className="flex-none rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-alert/10 hover:text-alert"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </>
+                      )}
                     </li>
                   );
                 })}
@@ -337,18 +360,20 @@ export function GroupPage() {
               ))}
             </ul>
           )}
-          <form onSubmit={handleAddParticipant} className="mt-4 flex max-w-sm gap-2">
-            <input
-              value={newParticipant}
-              onChange={(e) => setNewParticipant(e.target.value)}
-              placeholder={t('group.namePlaceholder')}
-              className="input"
-            />
-            <Button type="submit" className="inline-flex flex-none items-center gap-1.5">
-              <Plus className="h-4 w-4" />
-              {t('group.add')}
-            </Button>
-          </form>
+          {canEdit && (
+            <form onSubmit={handleAddParticipant} className="mt-4 flex max-w-sm gap-2">
+              <input
+                value={newParticipant}
+                onChange={(e) => setNewParticipant(e.target.value)}
+                placeholder={t('group.namePlaceholder')}
+                className="input"
+              />
+              <Button type="submit" className="inline-flex flex-none items-center gap-1.5">
+                <Plus className="h-4 w-4" />
+                {t('group.add')}
+              </Button>
+            </form>
+          )}
         </Section>
       </div>
     </div>
@@ -380,6 +405,58 @@ function Section({
       </div>
       {children}
     </section>
+  );
+}
+
+function UnlockBanner({
+  code,
+  onUnlock,
+}: {
+  code: string;
+  onUnlock: (result: { token: string; name: string; currency: string; role: 'editor' }) => void;
+}) {
+  const { t } = useTranslation();
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(false);
+    setLoading(true);
+    try {
+      const result = await api.joinGroup(code, pin);
+      onUnlock(result);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+          <Eye className="h-4 w-4 flex-none" />
+          {t('group.viewOnlyNotice')}
+        </div>
+        <div className="flex flex-none items-center gap-2">
+          <input
+            inputMode="numeric"
+            pattern="\d{4,6}"
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
+            placeholder={t('home.pinPlaceholder')}
+            className="input w-28"
+          />
+          <Button type="submit" variant="secondary" disabled={loading || !pin.trim()}>
+            {t('group.unlock')}
+          </Button>
+        </div>
+      </form>
+      {error && <p className="mt-2 text-xs text-alert">{t('home.errorInvalid')}</p>}
+    </div>
   );
 }
 

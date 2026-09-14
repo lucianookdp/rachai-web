@@ -88,9 +88,15 @@ export const api = {
     }),
 
   joinGroup: (code: string, pin: string) =>
-    request<{ token: string; name: string; currency: string }>(`/groups/${code}/join`, {
+    request<{ token: string; name: string; currency: string; role: 'editor' }>(`/groups/${code}/join`, {
       method: 'POST',
       body: JSON.stringify({ pin }),
+    }),
+
+  // No PIN: read-only access for anyone who only has the invite link.
+  viewGroup: (code: string) =>
+    request<{ token: string; name: string; currency: string; role: 'viewer' }>(`/groups/${code}/view`, {
+      method: 'POST',
     }),
 
   getGroup: (code: string, token: string) =>
