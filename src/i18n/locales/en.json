@@ -7,7 +7,7 @@
     "buttonShort": "Invite",
     "copy": "Copy invite",
     "copied": "Copied",
-    "pinHint": "The invite carries only the code. Send the PIN in a separate message: kept apart, they actually protect the group.",
+    "pinHint": "The invite carries only the code, so whoever gets it can follow along. Send the PIN separately, only to whoever should be able to edit too.",
     "message": "*Rachaí*\nI created the group *{{name}}* so we can split our expenses.\n\nJoin: {{url}}\nCode: *{{code}}*\n\nI'll send the PIN right after.\nNo sign-up, no app to install."
   },
   "home": {
@@ -29,11 +29,14 @@
     "groupNamePlaceholder": "Trip to the lake house",
     "pin": "PIN (4 to 6 digits)",
     "pinPlaceholder": "1234",
+    "joinPin": "PIN (optional)",
+    "joinPinHint": "Leave blank to just view the group, without being able to edit",
     "currency": "Currency",
     "code": "Group code",
     "codePlaceholder": "ABC123",
     "createButton": "Create group",
     "joinButton": "Join",
+    "viewButton": "View group",
     "createdTitle": "Group created!",
     "createdCode": "Save this code, you'll need it to come back:",
     "continueButton": "Continue to group",
@@ -72,7 +75,9 @@
     "expensePaidBySplit": "{{payer}} paid, split {{count}} ways",
     "markAsPaid": "Mark as paid",
     "noExpensesYet": "No expenses logged yet.",
-    "noParticipantsYet": "Add the first participant to get started."
+    "noParticipantsYet": "Add the first participant to get started.",
+    "viewOnlyNotice": "You're only viewing this group. Enter the PIN to make changes.",
+    "unlock": "Unlock"
   },
   "header": {
     "toggleTheme": "Toggle theme",

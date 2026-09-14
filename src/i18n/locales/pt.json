@@ -7,7 +7,7 @@
     "buttonShort": "Convidar",
     "copy": "Copiar convite",
     "copied": "Copiado",
-    "pinHint": "O convite leva só o código. Mande o PIN em outra mensagem: separados, eles protegem o grupo de verdade.",
+    "pinHint": "O convite leva só o código, então quem recebe consegue acompanhar o grupo. Mande o PIN separado só pra quem também vai poder editar.",
     "message": "*Rachaí*\nCriei o grupo *{{name}}* pra gente dividir as despesas.\n\nEntrar: {{url}}\nCódigo: *{{code}}*\n\nO PIN eu mando na sequência.\nNão precisa criar conta nem instalar app."
   },
   "home": {
@@ -29,11 +29,14 @@
     "groupNamePlaceholder": "Viagem para Floripa",
     "pin": "PIN (4 a 6 dígitos)",
     "pinPlaceholder": "1234",
+    "joinPin": "PIN (opcional)",
+    "joinPinHint": "Deixe em branco pra só visualizar o grupo, sem poder editar",
     "currency": "Moeda",
     "code": "Código do grupo",
     "codePlaceholder": "ABC123",
     "createButton": "Criar grupo",
     "joinButton": "Entrar",
+    "viewButton": "Visualizar grupo",
     "createdTitle": "Grupo criado!",
     "createdCode": "Guarde este código, você vai precisar dele para voltar:",
     "continueButton": "Continuar para o grupo",
@@ -72,7 +75,9 @@
     "expensePaidBySplit": "{{payer}} pagou, dividido entre {{count}}",
     "markAsPaid": "Marcar como pago",
     "noExpensesYet": "Nenhuma despesa lançada ainda.",
-    "noParticipantsYet": "Adicione o primeiro participante para começar."
+    "noParticipantsYet": "Adicione o primeiro participante para começar.",
+    "viewOnlyNotice": "Você está só visualizando este grupo. Digite o PIN para poder editar.",
+    "unlock": "Desbloquear"
   },
   "header": {
     "toggleTheme": "Alternar tema",
