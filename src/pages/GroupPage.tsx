@@ -3,6 +3,8 @@ import {
   Check,
   CheckCircle2,
   Copy,
+  Download,
+  Pencil,
   Plus,
   Receipt,
   Scale,
@@ -17,8 +19,19 @@ import { Button } from '../components/Button';
 import { CopyInviteButton } from '../components/CopyInviteButton';
 import { Field } from '../components/Field';
 import { WhatsAppShareButton } from '../components/WhatsAppShareButton';
-import { api, formatCents, type Balance, type Expense, type Participant, type Transfer } from '../lib/api';
+import {
+  api,
+  formatCents,
+  type Balance,
+  type Expense,
+  type ExpenseInput,
+  type Participant,
+  type Transfer,
+} from '../lib/api';
+import { buildExpensesCsv, downloadTextFile } from '../lib/csv';
 import { useGroupSession } from '../store/useGroupSession';
+
+type ExpenseFormTarget = 'new' | Expense | null;
 
 export function GroupPage() {
   const { code } = useParams<{ code: string }>();
@@ -31,7 +44,7 @@ export function GroupPage() {
   const [balances, setBalances] = useState<Balance[]>([]);
   const [transfers, setTransfers] = useState<Transfer[]>([]);
   const [newParticipant, setNewParticipant] = useState('');
-  const [showExpenseForm, setShowExpenseForm] = useState(false);
+  const [expenseFormTarget, setExpenseFormTarget] = useState<ExpenseFormTarget>(null);
   const [codeCopied, setCodeCopied] = useState(false);
   const currency = session.currency ?? 'USD';
 
@@ -90,9 +103,16 @@ export function GroupPage() {
     }
   }
 
+  function handleExportCsv() {
+    if (!code) return;
+    const csv = buildExpensesCsv(expenses, participants);
+    downloadTextFile(`rachai-${code}.csv`, csv, 'text/csv;charset=utf-8;');
+  }
+
   if (!code) return null;
 
   const isSettled = balances.every((b) => b.amountCents === 0);
+  const totalCents = expenses.reduce((sum, e) => sum + e.amountCents, 0);
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
@@ -194,29 +214,43 @@ export function GroupPage() {
           <Section
             icon={Receipt}
             title={t('group.expenses')}
+            subtitle={expenses.length > 0 ? formatCents(totalCents, currency, i18n.language) : undefined}
             action={
-              participants.length >= 1 && (
-                <Button
-                  variant="secondary"
-                  className="inline-flex flex-none items-center gap-1.5"
-                  onClick={() => setShowExpenseForm((v) => !v)}
-                >
-                  <Plus className="h-4 w-4" />
-                  {t('group.addExpense')}
-                </Button>
-              )
+              <div className="flex flex-none items-center gap-2">
+                {expenses.length > 0 && (
+                  <Button
+                    variant="secondary"
+                    className="inline-flex items-center gap-1.5"
+                    onClick={handleExportCsv}
+                  >
+                    <Download className="h-4 w-4" />
+                    {t('group.export')}
+                  </Button>
+                )}
+                {participants.length >= 1 && (
+                  <Button
+                    variant="secondary"
+                    className="inline-flex items-center gap-1.5"
+                    onClick={() => setExpenseFormTarget((current) => (current === 'new' ? null : 'new'))}
+                  >
+                    <Plus className="h-4 w-4" />
+                    {t('group.addExpense')}
+                  </Button>
+                )}
+              </div>
             }
           >
-            {showExpenseForm && (
+            {expenseFormTarget === 'new' && (
               <ExpenseForm
                 code={code}
                 token={session.token!}
                 participants={participants}
                 currency={currency}
                 onDone={() => {
-                  setShowExpenseForm(false);
+                  setExpenseFormTarget(null);
                   void load();
                 }}
+                onCancel={() => setExpenseFormTarget(null)}
               />
             )}
 
@@ -228,6 +262,25 @@ export function GroupPage() {
             ) : (
               <ul className="divide-y divide-[var(--border)]">
                 {expenses.map((expense) => {
+                  if (expenseFormTarget !== 'new' && expenseFormTarget?.id === expense.id) {
+                    return (
+                      <li key={expense.id} className="py-3 first:pt-0 last:pb-0">
+                        <ExpenseForm
+                          code={code}
+                          token={session.token!}
+                          participants={participants}
+                          currency={currency}
+                          editingExpense={expenseFormTarget}
+                          onDone={() => {
+                            setExpenseFormTarget(null);
+                            void load();
+                          }}
+                          onCancel={() => setExpenseFormTarget(null)}
+                        />
+                      </li>
+                    );
+                  }
+
                   const payer = participants.find((p) => p.id === expense.paidById);
                   return (
                     <li key={expense.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
@@ -243,6 +296,15 @@ export function GroupPage() {
                       <span className="flex-none font-bold">
                         {formatCents(expense.amountCents, currency, i18n.language)}
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => setExpenseFormTarget(expense)}
+                        aria-label={t('group.edit')}
+                        title={t('group.edit')}
+                        className="flex-none rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleDeleteExpense(expense.id)}
@@ -296,20 +358,23 @@ export function GroupPage() {
 function Section({
   icon: Icon,
   title,
+  subtitle,
   action,
   children,
 }: {
   icon: LucideIcon;
   title: string;
+  subtitle?: string;
   action?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
-      <div className="mb-4 flex items-center justify-between gap-3">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Icon className="h-[18px] w-[18px] text-teal" />
           <h2 className="font-display text-lg font-bold">{title}</h2>
+          {subtitle && <span className="text-sm font-medium text-[var(--text-muted)]">· {subtitle}</span>}
         </div>
         {action}
       </div>
@@ -343,36 +408,107 @@ function Avatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' }) {
   );
 }
 
+function parseAmountToCents(value: string): number {
+  const cents = Math.round(parseFloat(value.replace(',', '.')) * 100);
+  return Number.isFinite(cents) ? cents : 0;
+}
+
+function centsToAmountString(cents: number): string {
+  return (cents / 100).toFixed(2);
+}
+
+// Client-side mirror of the backend's splitEqually, used only to seed the
+// custom-amounts inputs with a sensible starting point when switching modes.
+// The backend re-validates whatever is actually submitted.
+function previewEqualSplit(totalCents: number, count: number): number[] {
+  if (count <= 0) return [];
+  const base = Math.floor(totalCents / count);
+  const remainder = totalCents - base * count;
+  return Array.from({ length: count }, (_, index) => (index < remainder ? base + 1 : base));
+}
+
 function ExpenseForm({
   code,
   token,
   participants,
   currency,
+  editingExpense,
   onDone,
+  onCancel,
 }: {
   code: string;
   token: string;
   participants: Participant[];
   currency: string;
+  editingExpense?: Expense;
   onDone: () => void;
+  onCancel: () => void;
 }) {
   const { t, i18n } = useTranslation();
-  const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
-  const [paidById, setPaidById] = useState(participants[0]?.id ?? '');
-  const [splitAmong, setSplitAmong] = useState<string[]>(participants.map((p) => p.id));
+  const [description, setDescription] = useState(editingExpense?.description ?? '');
+  const [paidById, setPaidById] = useState(editingExpense?.paidById ?? participants[0]?.id ?? '');
+  const [splitMode, setSplitMode] = useState<'equal' | 'custom'>(editingExpense ? 'custom' : 'equal');
+
+  const [amount, setAmount] = useState(editingExpense ? centsToAmountString(editingExpense.amountCents) : '');
+  const [splitAmong, setSplitAmong] = useState<string[]>(
+    editingExpense ? editingExpense.shares.map((s) => s.participantId) : participants.map((p) => p.id),
+  );
+
+  const [customAmounts, setCustomAmounts] = useState<Record<string, string>>(() =>
+    editingExpense
+      ? Object.fromEntries(editingExpense.shares.map((s) => [s.participantId, centsToAmountString(s.shareCents)]))
+      : {},
+  );
 
   function toggleParticipant(id: string) {
     setSplitAmong((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
   }
 
-  const amountCents = Math.round(parseFloat(amount.replace(',', '.')) * 100) || 0;
+  function handleModeChange(mode: 'equal' | 'custom') {
+    if (mode === 'custom' && Object.keys(customAmounts).length === 0 && splitAmong.length > 0) {
+      const shares = previewEqualSplit(parseAmountToCents(amount), splitAmong.length);
+      const seeded: Record<string, string> = {};
+      splitAmong.forEach((id, index) => {
+        seeded[id] = centsToAmountString(shares[index]!);
+      });
+      setCustomAmounts(seeded);
+    }
+    setSplitMode(mode);
+  }
+
+  const amountCents = parseAmountToCents(amount);
   const perPersonCents = splitAmong.length > 0 ? Math.floor(amountCents / splitAmong.length) : 0;
+  const customTotalCents = participants.reduce(
+    (sum, p) => sum + parseAmountToCents(customAmounts[p.id] ?? ''),
+    0,
+  );
+
+  const isValid =
+    !!paidById &&
+    (splitMode === 'equal'
+      ? amountCents > 0 && splitAmong.length > 0
+      : participants.some((p) => parseAmountToCents(customAmounts[p.id] ?? '') > 0));
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!amountCents || !paidById || splitAmong.length === 0) return;
-    await api.createExpense(code, token, { description, amountCents, paidById, participantIds: splitAmong });
+
+    let payload: ExpenseInput;
+    if (splitMode === 'equal') {
+      if (!amountCents || splitAmong.length === 0) return;
+      payload = { description, amountCents, paidById, participantIds: splitAmong };
+    } else {
+      const shares = participants
+        .map((p) => ({ participantId: p.id, shareCents: parseAmountToCents(customAmounts[p.id] ?? '') }))
+        .filter((s) => s.shareCents > 0);
+      if (shares.length === 0) return;
+      payload = { description, amountCents: shares.reduce((sum, s) => sum + s.shareCents, 0), paidById, shares };
+    }
+
+    if (editingExpense) {
+      await api.updateExpense(code, token, editingExpense.id, payload);
+    } else {
+      await api.createExpense(code, token, payload);
+    }
     onDone();
   }
 
@@ -387,64 +523,116 @@ function ExpenseForm({
           className="input"
         />
       </Field>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Field label={t('group.amount')} className="flex-1">
-          <input
-            required
-            inputMode="decimal"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder={t('group.amountPlaceholder')}
-            className="input"
-          />
-        </Field>
-        <Field label={t('group.paidBy')} className="flex-1">
-          <select value={paidById} onChange={(e) => setPaidById(e.target.value)} className="input">
-            {participants.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </Field>
-      </div>
+
+      <Field label={t('group.paidBy')}>
+        <select value={paidById} onChange={(e) => setPaidById(e.target.value)} className="input">
+          {participants.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+      </Field>
+
       <div>
         <p className="mb-1.5 text-sm font-medium text-[var(--text-muted)]">{t('group.splitAmong')}</p>
-        <div className="flex flex-wrap gap-2">
-          {participants.map((p) => {
-            const selected = splitAmong.includes(p.id);
-            return (
-              <button
-                type="button"
-                key={p.id}
-                onClick={() => toggleParticipant(p.id)}
-                className={`inline-flex items-center gap-1.5 rounded-full border py-1 pl-1 pr-3 text-sm font-medium transition-colors ${
-                  selected
-                    ? 'border-teal bg-teal/10 text-teal'
-                    : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text)]'
-                }`}
-              >
-                {selected ? (
-                  <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-teal text-white">
-                    <Check className="h-3.5 w-3.5" />
-                  </span>
-                ) : (
-                  <Avatar name={p.name} size="sm" />
-                )}
-                {p.name}
-              </button>
-            );
-          })}
+        <div className="mb-3 flex rounded-xl border border-[var(--border)] p-1">
+          <button
+            type="button"
+            onClick={() => handleModeChange('equal')}
+            className={`flex-1 rounded-lg py-1.5 text-sm font-semibold transition-colors ${
+              splitMode === 'equal' ? 'bg-[var(--surface)]' : 'text-[var(--text-muted)]'
+            }`}
+          >
+            {t('group.splitEqual')}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleModeChange('custom')}
+            className={`flex-1 rounded-lg py-1.5 text-sm font-semibold transition-colors ${
+              splitMode === 'custom' ? 'bg-[var(--surface)]' : 'text-[var(--text-muted)]'
+            }`}
+          >
+            {t('group.splitCustom')}
+          </button>
         </div>
-        {amountCents > 0 && splitAmong.length > 0 && (
-          <p className="mt-2 text-xs text-[var(--text-muted)]">
-            {t('group.perPersonHint', { amount: formatCents(perPersonCents, currency, i18n.language) })}
-          </p>
+
+        {splitMode === 'equal' ? (
+          <>
+            <Field label={t('group.amount')}>
+              <input
+                required
+                inputMode="decimal"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder={t('group.amountPlaceholder')}
+                className="input"
+              />
+            </Field>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {participants.map((p) => {
+                const selected = splitAmong.includes(p.id);
+                return (
+                  <button
+                    type="button"
+                    key={p.id}
+                    onClick={() => toggleParticipant(p.id)}
+                    className={`inline-flex items-center gap-1.5 rounded-full border py-1 pl-1 pr-3 text-sm font-medium transition-colors ${
+                      selected
+                        ? 'border-teal bg-teal/10 text-teal'
+                        : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text)]'
+                    }`}
+                  >
+                    {selected ? (
+                      <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-teal text-white">
+                        <Check className="h-3.5 w-3.5" />
+                      </span>
+                    ) : (
+                      <Avatar name={p.name} size="sm" />
+                    )}
+                    {p.name}
+                  </button>
+                );
+              })}
+            </div>
+            {amountCents > 0 && splitAmong.length > 0 && (
+              <p className="mt-2 text-xs text-[var(--text-muted)]">
+                {t('group.perPersonHint', { amount: formatCents(perPersonCents, currency, i18n.language) })}
+              </p>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="space-y-2">
+              {participants.map((p) => (
+                <div key={p.id} className="flex items-center gap-2">
+                  <Avatar name={p.name} size="sm" />
+                  <span className="flex-1 truncate text-sm font-medium">{p.name}</span>
+                  <input
+                    inputMode="decimal"
+                    value={customAmounts[p.id] ?? ''}
+                    onChange={(e) => setCustomAmounts((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                    placeholder={t('group.amountPlaceholder')}
+                    className="input w-28 text-right"
+                  />
+                </div>
+              ))}
+            </div>
+            <p className="mt-2 text-sm font-semibold">
+              {t('group.customTotal', { amount: formatCents(customTotalCents, currency, i18n.language) })}
+            </p>
+          </>
         )}
       </div>
-      <Button type="submit" className="w-full sm:w-auto">
-        {t('group.save')}
-      </Button>
+
+      <div className="flex gap-2">
+        <Button type="submit" disabled={!isValid} className="flex-1 sm:flex-none">
+          {t('group.save')}
+        </Button>
+        <Button type="button" variant="secondary" onClick={onCancel} className="flex-1 sm:flex-none">
+          {t('group.cancel')}
+        </Button>
+      </div>
     </form>
   );
 }

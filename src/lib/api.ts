@@ -67,6 +67,19 @@ export interface Transfer {
   toName: string;
 }
 
+export interface ExpenseShareInput {
+  participantId: string;
+  shareCents: number;
+}
+
+export interface ExpenseInput {
+  description: string;
+  amountCents: number;
+  paidById: string;
+  participantIds?: string[];
+  shares?: ExpenseShareInput[];
+}
+
 export const api = {
   createGroup: (name: string, pin: string, currency: string) =>
     request<{ code: string; name: string; currency: string }>('/groups', {
@@ -98,13 +111,16 @@ export const api = {
   getExpenses: (code: string, token: string) =>
     request<Expense[]>(`/groups/${code}/expenses`, { headers: authHeaders(token) }),
 
-  createExpense: (
-    code: string,
-    token: string,
-    data: { description: string; amountCents: number; paidById: string; participantIds?: string[] },
-  ) =>
+  createExpense: (code: string, token: string, data: ExpenseInput) =>
     request<Expense>(`/groups/${code}/expenses`, {
       method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify(data),
+    }),
+
+  updateExpense: (code: string, token: string, id: string, data: ExpenseInput) =>
+    request<Expense>(`/groups/${code}/expenses/${id}`, {
+      method: 'PATCH',
       headers: authHeaders(token),
       body: JSON.stringify(data),
     }),
