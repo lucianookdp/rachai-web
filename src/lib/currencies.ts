@@ -58,7 +58,3 @@ export const CURRENCIES = [
 ] as const;
 
 export type CurrencyCode = (typeof CURRENCIES)[number]['code'];
-
-export function guessDefaultCurrency(language: string): CurrencyCode {
-  return language.toLowerCase().startsWith('pt') ? 'BRL' : 'USD';
-}

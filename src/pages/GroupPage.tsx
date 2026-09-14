@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { CopyInviteButton } from '../components/CopyInviteButton';
+import { Field } from '../components/Field';
 import { WhatsAppShareButton } from '../components/WhatsAppShareButton';
 import { api, formatCents, type Balance, type Expense, type Participant, type Transfer } from '../lib/api';
 import { useGroupSession } from '../store/useGroupSession';
@@ -157,9 +158,10 @@ export function GroupPage() {
 
             {transfers.length > 0 && (
               <div className="mt-5 border-t border-[var(--border)] pt-4">
-                <h3 className="mb-2.5 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
                   {t('group.suggestedTransfers')}
                 </h3>
+                <p className="mb-2.5 mt-1 text-xs text-[var(--text-muted)]">{t('group.suggestedTransfersHint')}</p>
                 <ul className="space-y-2">
                   {transfers.map((tr, i) => (
                     <li key={i} className="rounded-xl border border-[var(--border)] p-3">
@@ -210,6 +212,7 @@ export function GroupPage() {
                 code={code}
                 token={session.token!}
                 participants={participants}
+                currency={currency}
                 onDone={() => {
                   setShowExpenseForm(false);
                   void load();
@@ -231,7 +234,11 @@ export function GroupPage() {
                       {payer && <Avatar name={payer.name} />}
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-medium">{expense.description}</p>
-                        <p className="truncate text-xs text-[var(--text-muted)]">{payer?.name}</p>
+                        {payer && (
+                          <p className="truncate text-xs text-[var(--text-muted)]">
+                            {t('group.expensePaidBySplit', { payer: payer.name, count: expense.shares.length })}
+                          </p>
+                        )}
                       </div>
                       <span className="flex-none font-bold">
                         {formatCents(expense.amountCents, currency, i18n.language)}
@@ -340,14 +347,16 @@ function ExpenseForm({
   code,
   token,
   participants,
+  currency,
   onDone,
 }: {
   code: string;
   token: string;
   participants: Participant[];
+  currency: string;
   onDone: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [paidById, setPaidById] = useState(participants[0]?.id ?? '');
@@ -357,9 +366,11 @@ function ExpenseForm({
     setSplitAmong((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
   }
 
+  const amountCents = Math.round(parseFloat(amount.replace(',', '.')) * 100) || 0;
+  const perPersonCents = splitAmong.length > 0 ? Math.floor(amountCents / splitAmong.length) : 0;
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const amountCents = Math.round(parseFloat(amount.replace(',', '.')) * 100);
     if (!amountCents || !paidById || splitAmong.length === 0) return;
     await api.createExpense(code, token, { description, amountCents, paidById, participantIds: splitAmong });
     onDone();
@@ -367,29 +378,35 @@ function ExpenseForm({
 
   return (
     <form onSubmit={handleSubmit} className="mb-5 space-y-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
-      <input
-        required
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder={t('group.descriptionPlaceholder')}
-        className="input"
-      />
-      <div className="flex gap-3">
+      <Field label={t('group.description')}>
         <input
           required
-          inputMode="decimal"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder={t('group.amount')}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder={t('group.descriptionPlaceholder')}
           className="input"
         />
-        <select value={paidById} onChange={(e) => setPaidById(e.target.value)} className="input">
-          {participants.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
+      </Field>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Field label={t('group.amount')} className="flex-1">
+          <input
+            required
+            inputMode="decimal"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder={t('group.amountPlaceholder')}
+            className="input"
+          />
+        </Field>
+        <Field label={t('group.paidBy')} className="flex-1">
+          <select value={paidById} onChange={(e) => setPaidById(e.target.value)} className="input">
+            {participants.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </Field>
       </div>
       <div>
         <p className="mb-1.5 text-sm font-medium text-[var(--text-muted)]">{t('group.splitAmong')}</p>
@@ -419,6 +436,11 @@ function ExpenseForm({
             );
           })}
         </div>
+        {amountCents > 0 && splitAmong.length > 0 && (
+          <p className="mt-2 text-xs text-[var(--text-muted)]">
+            {t('group.perPersonHint', { amount: formatCents(perPersonCents, currency, i18n.language) })}
+          </p>
+        )}
       </div>
       <Button type="submit" className="w-full sm:w-auto">
         {t('group.save')}
