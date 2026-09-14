@@ -153,7 +153,7 @@ export function GroupPage() {
             )}
           </button>
         </div>
-        <div className="flex flex-none items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <CopyInviteButton groupName={session.name ?? ''} code={code} />
           <WhatsAppShareButton groupName={session.name ?? ''} code={code} />
         </div>
@@ -235,7 +235,7 @@ export function GroupPage() {
             title={t('group.expenses')}
             subtitle={expenses.length > 0 ? formatCents(totalCents, currency, i18n.language) : undefined}
             action={
-              <div className="flex flex-none items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {expenses.length > 0 && (
                   <Button
                     variant="secondary"
@@ -322,7 +322,7 @@ export function GroupPage() {
                             onClick={() => setExpenseFormTarget(expense)}
                             aria-label={t('group.edit')}
                             title={t('group.edit')}
-                            className="flex-none rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
+                            className="flex-none rounded-lg p-2 text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
                           >
                             <Pencil className="h-4 w-4" />
                           </button>
@@ -331,7 +331,7 @@ export function GroupPage() {
                             onClick={() => handleDeleteExpense(expense.id)}
                             aria-label={t('group.delete')}
                             title={t('group.delete')}
-                            className="flex-none rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-alert/10 hover:text-alert"
+                            className="flex-none rounded-lg p-2 text-[var(--text-muted)] hover:bg-alert/10 hover:text-alert"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
