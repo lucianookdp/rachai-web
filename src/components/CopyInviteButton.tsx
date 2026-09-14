@@ -31,7 +31,7 @@ export function CopyInviteButton({ groupName, code, compact = false, className =
     <button
       type="button"
       onClick={handleCopy}
-      className={`inline-flex items-center justify-center gap-2 border border-[var(--border)] font-semibold text-[var(--text)] transition-colors hover:bg-[var(--surface-2)] ${size} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 whitespace-nowrap border border-[var(--border)] font-semibold text-[var(--text)] transition-colors hover:bg-[var(--surface-2)] ${size} ${className}`}
     >
       {copied ? (
         <Check className={compact ? 'h-3.5 w-3.5 text-success' : 'h-4 w-4 text-success'} />
