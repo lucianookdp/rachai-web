@@ -1,20 +1,25 @@
 import { CircleDollarSign, MessageCircle, Zap } from 'lucide-react';
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '../components/Button';
 import { CopyInviteButton } from '../components/CopyInviteButton';
+import { Field } from '../components/Field';
 import { WhatsAppShareButton } from '../components/WhatsAppShareButton';
 import { api, ApiError } from '../lib/api';
-import { CURRENCIES, guessDefaultCurrency } from '../lib/currencies';
+import { CURRENCIES } from '../lib/currencies';
 import { sanitizeGroupCode } from '../lib/share';
 import { useGroupSession } from '../store/useGroupSession';
 
 type Tab = 'create' | 'join';
 
+// Most groups so far have been in reais; people who need something else
+// change it right there in the same dropdown.
+const DEFAULT_CURRENCY = 'BRL';
+
 export function Home() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const setSession = useGroupSession((s) => s.setSession);
 
@@ -26,7 +31,7 @@ export function Home() {
   const [tab, setTab] = useState<Tab>(invitedCode ? 'join' : 'create');
   const [name, setName] = useState('');
   const [pin, setPin] = useState('');
-  const [currency, setCurrency] = useState<string>(() => guessDefaultCurrency(i18n.language));
+  const [currency, setCurrency] = useState<string>(DEFAULT_CURRENCY);
   const [code, setCode] = useState(invitedCode);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -215,14 +220,5 @@ export function Home() {
         </div>
       </div>
     </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-[var(--text-muted)]">{label}</span>
-      {children}
-    </label>
   );
 }
