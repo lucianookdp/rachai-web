@@ -159,6 +159,37 @@ export function GroupPage() {
         </div>
       </div>
 
+      <div className="mb-6">
+        <Section icon={Users} title={t('group.participants')}>
+          {participants.length === 0 ? (
+            <p className="text-[var(--text-muted)]">{t('group.noParticipantsYet')}</p>
+          ) : (
+            <ul className="flex flex-wrap gap-2">
+              {participants.map((p) => (
+                <li key={p.id} className="flex items-center gap-2 rounded-full bg-[var(--surface-2)] py-1 pl-1 pr-3">
+                  <Avatar name={p.name} size="sm" />
+                  <span className="text-sm font-medium">{p.name}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {canEdit && (
+            <form onSubmit={handleAddParticipant} className="mt-4 flex max-w-sm gap-2">
+              <input
+                value={newParticipant}
+                onChange={(e) => setNewParticipant(e.target.value)}
+                placeholder={t('group.namePlaceholder')}
+                className="input"
+              />
+              <Button type="submit" className="inline-flex flex-none items-center gap-1.5">
+                <Plus className="h-4 w-4" />
+                {t('group.add')}
+              </Button>
+            </form>
+          )}
+        </Section>
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-[1fr_380px] lg:items-start">
         <div className="space-y-6 lg:order-2">
           <Section icon={Scale} title={t('group.balances')}>
@@ -344,37 +375,6 @@ export function GroupPage() {
             )}
           </Section>
         </div>
-      </div>
-
-      <div className="mt-6">
-        <Section icon={Users} title={t('group.participants')}>
-          {participants.length === 0 ? (
-            <p className="text-[var(--text-muted)]">{t('group.noParticipantsYet')}</p>
-          ) : (
-            <ul className="flex flex-wrap gap-2">
-              {participants.map((p) => (
-                <li key={p.id} className="flex items-center gap-2 rounded-full bg-[var(--surface-2)] py-1 pl-1 pr-3">
-                  <Avatar name={p.name} size="sm" />
-                  <span className="text-sm font-medium">{p.name}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-          {canEdit && (
-            <form onSubmit={handleAddParticipant} className="mt-4 flex max-w-sm gap-2">
-              <input
-                value={newParticipant}
-                onChange={(e) => setNewParticipant(e.target.value)}
-                placeholder={t('group.namePlaceholder')}
-                className="input"
-              />
-              <Button type="submit" className="inline-flex flex-none items-center gap-1.5">
-                <Plus className="h-4 w-4" />
-                {t('group.add')}
-              </Button>
-            </form>
-          )}
-        </Section>
       </div>
     </div>
   );
@@ -613,7 +613,7 @@ function ExpenseForm({
 
       <div>
         <p className="mb-1.5 text-sm font-medium text-[var(--text-muted)]">{t('group.splitAmong')}</p>
-        <div className="mb-3 flex rounded-xl border border-[var(--border)] p-1">
+        <div className="mb-2 flex rounded-xl border border-[var(--border)] p-1">
           <button
             type="button"
             onClick={() => handleModeChange('equal')}
@@ -633,6 +633,9 @@ function ExpenseForm({
             {t('group.splitCustom')}
           </button>
         </div>
+        <p className="mb-3 text-xs text-[var(--text-muted)]">
+          {t(splitMode === 'equal' ? 'group.splitEqualHint' : 'group.splitCustomHint')}
+        </p>
 
         {splitMode === 'equal' ? (
           <>
@@ -695,9 +698,10 @@ function ExpenseForm({
                 </div>
               ))}
             </div>
-            <p className="mt-2 text-sm font-semibold">
-              {t('group.customTotal', { amount: formatCents(customTotalCents, currency, i18n.language) })}
-            </p>
+            <div className="mt-3 flex items-center justify-between rounded-xl bg-[var(--surface-2)] px-3.5 py-2.5 text-sm">
+              <span className="text-[var(--text-muted)]">{t('group.customTotalLabel')}</span>
+              <span className="font-bold">{formatCents(customTotalCents, currency, i18n.language)}</span>
+            </div>
           </>
         )}
       </div>
