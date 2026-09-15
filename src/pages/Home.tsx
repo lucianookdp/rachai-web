@@ -1,13 +1,13 @@
-import { CircleDollarSign, MessageCircle, Zap } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { ArrowRight, CircleDollarSign, MessageCircle, Zap } from 'lucide-react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { animate, motion, type Variants } from 'framer-motion';
 import { Button } from '../components/Button';
 import { CopyInviteButton } from '../components/CopyInviteButton';
 import { Field } from '../components/Field';
 import { WhatsAppShareButton } from '../components/WhatsAppShareButton';
-import { api, ApiError } from '../lib/api';
+import { api, ApiError, formatCents } from '../lib/api';
 import { CURRENCIES } from '../lib/currencies';
 import { sanitizeGroupCode } from '../lib/share';
 import { useGroupSession } from '../store/useGroupSession';
@@ -17,6 +17,16 @@ type Tab = 'create' | 'join';
 // Most groups so far have been in reais; people who need something else
 // change it right there in the same dropdown.
 const DEFAULT_CURRENCY = 'BRL';
+
+const heroContainer: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
+};
+
+const heroItem: Variants = {
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+};
 
 export function Home() {
   const { t } = useTranslation();
@@ -96,17 +106,41 @@ export function Home() {
 
   return (
     <div>
-      <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-10 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-20">
-        <div className="text-center lg:text-left">
-          <h1 className="text-3xl font-extrabold leading-[1.1] text-balance sm:text-4xl lg:text-5xl">
+      <div className="mx-auto grid max-w-6xl items-start gap-10 px-5 py-10 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-20">
+        <motion.div
+          variants={heroContainer}
+          initial="hidden"
+          animate="show"
+          className="text-center lg:text-left"
+        >
+          <motion.span
+            variants={heroItem}
+            className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-semibold text-[var(--text-muted)]"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-success" />
+            {t('home.eyebrow')}
+          </motion.span>
+
+          <motion.h1
+            variants={heroItem}
+            className="mt-4 text-3xl font-extrabold leading-[1.1] text-balance sm:text-4xl lg:text-5xl"
+          >
             {t('home.heroTitle1')}
             <br />
             <span className="brand-gradient-text">{t('home.heroTitle2')}</span>
-          </h1>
-          <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-[var(--text-muted)] lg:mx-0">
+          </motion.h1>
+
+          <motion.p
+            variants={heroItem}
+            className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-[var(--text-muted)] lg:mx-0"
+          >
             {t('home.heroLede')}
-          </p>
-          <ul className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 lg:justify-start">
+          </motion.p>
+
+          <motion.ul
+            variants={heroItem}
+            className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 lg:justify-start"
+          >
             {[t('home.trustSignup'), t('home.trustCurrencies'), t('home.trustWhatsapp')].map((item) => (
               <li key={item} className="flex items-center gap-1.5 text-sm text-[var(--text-muted)]">
                 <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 flex-none text-success">
@@ -115,10 +149,19 @@ export function Home() {
                 {item}
               </li>
             ))}
-          </ul>
-        </div>
+          </motion.ul>
 
-        <div className="mx-auto w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+          <motion.div variants={heroItem}>
+            <ReceiptDemo />
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
+          className="mx-auto w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm"
+        >
           <div className="flex rounded-xl border border-[var(--border)] p-1">
             <button
               type="button"
@@ -199,7 +242,7 @@ export function Home() {
               </Button>
             </form>
           )}
-        </div>
+        </motion.div>
       </div>
 
       <div className="border-t border-[var(--border)]">
@@ -210,17 +253,86 @@ export function Home() {
               { icon: CircleDollarSign, title: t('home.feature2Title'), desc: t('home.feature2Desc') },
               { icon: MessageCircle, title: t('home.feature3Title'), desc: t('home.feature3Desc') },
             ] as const
-          ).map(({ icon: Icon, title, desc }) => (
-            <div key={title}>
+          ).map(({ icon: Icon, title, desc }, index) => (
+            <motion.div
+              key={title}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.4, delay: index * 0.1, ease: 'easeOut' }}
+              whileHover={{ y: -3 }}
+            >
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal/10 text-teal">
                 <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
               </div>
               <h3 className="mt-3 font-display text-[15px] font-bold">{title}</h3>
               <p className="mt-1 text-sm leading-relaxed text-[var(--text-muted)]">{desc}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function useCountUp(targetCents: number, delay: number): number {
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    const controls = animate(0, targetCents, {
+      duration: 0.9,
+      delay,
+      ease: 'easeOut',
+      onUpdate: (v) => setValue(Math.round(v)),
+    });
+    return () => controls.stop();
+  }, [targetCents, delay]);
+
+  return value;
+}
+
+// A small live-looking preview of the actual product: two example expenses
+// tally up and settle into the one transfer that closes them out. Shows what
+// the app does instead of just listing feature bullets.
+function ReceiptDemo() {
+  const { t, i18n } = useTranslation();
+  const items = [
+    { label: t('home.demoItem1'), cents: 12000 },
+    { label: t('home.demoItem2'), cents: 4000 },
+  ];
+  const totalTarget = items.reduce((sum, item) => sum + item.cents, 0);
+  const total = useCountUp(totalTarget, 0.5);
+  const resultAmount = useCountUp(totalTarget / 2, 1.1);
+
+  return (
+    <div className="mx-auto mt-8 w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm lg:mx-0">
+      <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">{t('home.demoLabel')}</p>
+      <ul className="mt-3 space-y-2">
+        {items.map((item) => (
+          <li key={item.label} className="flex items-center justify-between text-sm">
+            <span className="text-[var(--text-muted)]">{item.label}</span>
+            <span className="font-mono font-medium tabular-nums">{formatCents(item.cents, 'BRL', i18n.language)}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="my-3 border-t border-dashed border-[var(--border)]" />
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-[var(--text-muted)]">{t('home.demoTotal')}</span>
+        <span className="font-mono font-bold tabular-nums">{formatCents(total, 'BRL', i18n.language)}</span>
+      </div>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 1.1, type: 'spring', stiffness: 220, damping: 18 }}
+        className="mt-4 flex items-center gap-2 rounded-xl bg-success/10 px-3 py-2.5 text-sm font-medium text-success"
+      >
+        <ArrowRight className="h-3.5 w-3.5 flex-none" />
+        {t('group.transferLine', {
+          from: t('home.demoFrom'),
+          to: t('home.demoTo'),
+          amount: formatCents(resultAmount, 'BRL', i18n.language),
+        })}
+      </motion.div>
     </div>
   );
 }
