@@ -113,17 +113,9 @@ export function Home() {
           animate="show"
           className="text-center lg:text-left"
         >
-          <motion.span
-            variants={heroItem}
-            className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-semibold text-[var(--text-muted)]"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-success" />
-            {t('home.eyebrow')}
-          </motion.span>
-
           <motion.h1
             variants={heroItem}
-            className="mt-4 text-3xl font-extrabold leading-[1.1] text-balance sm:text-4xl lg:text-5xl"
+            className="text-3xl font-extrabold leading-[1.1] text-balance sm:text-4xl lg:text-5xl"
           >
             {t('home.heroTitle1')}
             <br />
