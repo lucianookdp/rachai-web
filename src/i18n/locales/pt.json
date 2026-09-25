@@ -85,7 +85,29 @@
     "noExpensesYet": "Nenhuma despesa lançada ainda.",
     "noParticipantsYet": "Adicione o primeiro participante para começar.",
     "viewOnlyNotice": "Você está só visualizando este grupo. Digite o PIN para poder editar.",
-    "unlock": "Desbloquear"
+    "unlock": "Desbloquear",
+    "category": "Categoria",
+    "note": "Observação (opcional)",
+    "notePlaceholder": "Ex.: pago no cartão, nota 1234",
+    "repeatMonthly": "Repetir todo mês",
+    "repeatMonthlyHint": "Lança agora e repete todo mês no dia escolhido. Divide igual entre os selecionados.",
+    "dayOfMonth": "Dia do mês",
+    "monthlyExpenses": "Despesas mensais",
+    "monthlyLine": "{{amount}} · todo dia {{day}}",
+    "stopRecurring": "Parar de repetir",
+    "monthlyBadge": "mensal",
+    "pixKeyOf": "Chave Pix de {{name}}",
+    "pixKeyPlaceholder": "E-mail, telefone (+55…) ou chave aleatória",
+    "pixKeyHint": "Não use CPF: todo mundo com o link do grupo vê a chave.",
+    "pixKeyCpf": "Por segurança, CPF não é aceito. Use a chave aleatória, o e-mail ou o telefone.",
+    "pixKeyInvalid": "Essa chave Pix não é válida.",
+    "removePixKey": "Remover chave",
+    "setPixKey": "Chave Pix",
+    "copyPix": "Copiar Pix",
+    "pixCopied": "Pix copiado!",
+    "copyPixHint": "Cole no app do banco, em Pix copia e cola. O valor já vem preenchido.",
+    "spendingByCategory": "Gastos por categoria",
+    "limitReached": "Não foi possível salvar: {{error}}"
   },
   "header": {
     "toggleTheme": "Alternar tema",
@@ -106,5 +128,15 @@
     "recentGroups": "Grupos recentes",
     "deactivate": "Desativar",
     "logout": "Sair"
+  },
+  "categories": {
+    "food": "Comida",
+    "groceries": "Mercado",
+    "transport": "Transporte",
+    "lodging": "Hospedagem",
+    "housing": "Casa e contas",
+    "entertainment": "Lazer",
+    "shopping": "Compras",
+    "other": "Outros"
   }
 }

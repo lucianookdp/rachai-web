@@ -85,7 +85,29 @@
     "noExpensesYet": "No expenses logged yet.",
     "noParticipantsYet": "Add the first participant to get started.",
     "viewOnlyNotice": "You're only viewing this group. Enter the PIN to make changes.",
-    "unlock": "Unlock"
+    "unlock": "Unlock",
+    "category": "Category",
+    "note": "Note (optional)",
+    "notePlaceholder": "E.g. paid by card, receipt 1234",
+    "repeatMonthly": "Repeat every month",
+    "repeatMonthlyHint": "Logs it now and repeats it every month on the chosen day, split equally among those selected.",
+    "dayOfMonth": "Day of the month",
+    "monthlyExpenses": "Monthly expenses",
+    "monthlyLine": "{{amount}} · every month on day {{day}}",
+    "stopRecurring": "Stop repeating",
+    "monthlyBadge": "monthly",
+    "pixKeyOf": "{{name}}'s Pix key",
+    "pixKeyPlaceholder": "E-mail, phone (+55…) or random key",
+    "pixKeyHint": "Don't use a CPF: everyone with the group link can see the key.",
+    "pixKeyCpf": "For safety, a CPF isn't accepted. Use the random key, e-mail or phone.",
+    "pixKeyInvalid": "That Pix key isn't valid.",
+    "removePixKey": "Remove key",
+    "setPixKey": "Pix key",
+    "copyPix": "Copy Pix",
+    "pixCopied": "Pix copied!",
+    "copyPixHint": "Paste it in your bank app under Pix copy and paste. The amount is already filled in.",
+    "spendingByCategory": "Spending by category",
+    "limitReached": "Couldn't save: {{error}}"
   },
   "header": {
     "toggleTheme": "Toggle theme",
@@ -106,5 +128,15 @@
     "recentGroups": "Recent groups",
     "deactivate": "Deactivate",
     "logout": "Log out"
+  },
+  "categories": {
+    "food": "Food",
+    "groceries": "Groceries",
+    "transport": "Transport",
+    "lodging": "Lodging",
+    "housing": "Housing & bills",
+    "entertainment": "Entertainment",
+    "shopping": "Shopping",
+    "other": "Other"
   }
 }

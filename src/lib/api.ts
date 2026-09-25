@@ -35,6 +35,7 @@ export interface Participant {
   id: string;
   name: string;
   groupId: string;
+  pixKey: string | null;
   createdAt: string;
 }
 
@@ -49,8 +50,43 @@ export interface Expense {
   description: string;
   amountCents: number;
   paidById: string;
+  category: ExpenseCategory;
+  note: string | null;
+  recurringId: string | null;
   createdAt: string;
   shares: ExpenseShare[];
+}
+
+export const EXPENSE_CATEGORIES = [
+  'food',
+  'groceries',
+  'transport',
+  'lodging',
+  'housing',
+  'entertainment',
+  'shopping',
+  'other',
+] as const;
+
+export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
+
+export interface RecurringExpense {
+  id: string;
+  description: string;
+  amountCents: number;
+  paidById: string;
+  participantIds: string[];
+  category: ExpenseCategory;
+  dayOfMonth: number;
+}
+
+export interface RecurringInput {
+  description: string;
+  amountCents: number;
+  paidById: string;
+  participantIds: string[];
+  category: ExpenseCategory;
+  dayOfMonth: number;
 }
 
 export interface Balance {
@@ -76,6 +112,8 @@ export interface ExpenseInput {
   description: string;
   amountCents: number;
   paidById: string;
+  category?: ExpenseCategory;
+  note?: string | null;
   participantIds?: string[];
   shares?: ExpenseShareInput[];
 }
@@ -113,6 +151,27 @@ export const api = {
       headers: authHeaders(token),
       body: JSON.stringify({ name }),
     }),
+
+  // null or "" removes the key.
+  updateParticipantPixKey: (code: string, token: string, id: string, pixKey: string | null) =>
+    request<Participant>(`/groups/${code}/participants/${id}`, {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify({ pixKey }),
+    }),
+
+  getRecurring: (code: string, token: string) =>
+    request<RecurringExpense[]>(`/groups/${code}/recurring`, { headers: authHeaders(token) }),
+
+  createRecurring: (code: string, token: string, data: RecurringInput) =>
+    request<RecurringExpense>(`/groups/${code}/recurring`, {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify(data),
+    }),
+
+  deleteRecurring: (code: string, token: string, id: string) =>
+    request<void>(`/groups/${code}/recurring/${id}`, { method: 'DELETE', headers: authHeaders(token) }),
 
   getExpenses: (code: string, token: string) =>
     request<Expense[]>(`/groups/${code}/expenses`, { headers: authHeaders(token) }),

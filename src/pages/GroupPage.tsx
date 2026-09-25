@@ -1,16 +1,27 @@
 import {
   ArrowRight,
+  BedDouble,
+  Car,
+  ChartPie,
   Check,
   CheckCircle2,
   Copy,
   Download,
   Eye,
+  House,
+  KeyRound,
   Pencil,
   Plus,
   Receipt,
+  Repeat,
   Scale,
+  ShoppingBag,
+  ShoppingBasket,
+  Tag,
+  Ticket,
   Trash2,
   Users,
+  Utensils,
   type LucideIcon,
 } from 'lucide-react';
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
@@ -22,17 +33,50 @@ import { Field } from '../components/Field';
 import { WhatsAppShareButton } from '../components/WhatsAppShareButton';
 import {
   api,
+  ApiError,
+  EXPENSE_CATEGORIES,
   formatCents,
   type Balance,
   type Expense,
+  type ExpenseCategory,
   type ExpenseInput,
   type Participant,
+  type RecurringExpense,
   type Transfer,
 } from '../lib/api';
 import { buildExpensesCsv, downloadTextFile } from '../lib/csv';
+import { buildPixPayload } from '../lib/pix';
 import { useGroupSession } from '../store/useGroupSession';
 
 type ExpenseFormTarget = 'new' | Expense | null;
+
+const CATEGORY_ICONS: Record<ExpenseCategory, LucideIcon> = {
+  food: Utensils,
+  groceries: ShoppingBasket,
+  transport: Car,
+  lodging: BedDouble,
+  housing: House,
+  entertainment: Ticket,
+  shopping: ShoppingBag,
+  other: Tag,
+};
+
+// Distinct hues for the chart bars, readable on both themes.
+const CATEGORY_COLORS: Record<ExpenseCategory, string> = {
+  food: 'hsl(24 85% 52%)',
+  groceries: 'hsl(142 55% 40%)',
+  transport: 'hsl(210 75% 50%)',
+  lodging: 'hsl(265 60% 58%)',
+  housing: 'hsl(174 70% 38%)',
+  entertainment: 'hsl(330 70% 55%)',
+  shopping: 'hsl(45 90% 45%)',
+  other: 'hsl(215 12% 55%)',
+};
+
+// Older expenses (and an API that predates categories) may not carry one.
+function categoryOf(expense: Expense): ExpenseCategory {
+  return (EXPENSE_CATEGORIES as readonly string[]).includes(expense.category) ? expense.category : 'other';
+}
 
 export function GroupPage() {
   const { code } = useParams<{ code: string }>();
@@ -44,6 +88,8 @@ export function GroupPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [balances, setBalances] = useState<Balance[]>([]);
   const [transfers, setTransfers] = useState<Transfer[]>([]);
+  const [recurring, setRecurring] = useState<RecurringExpense[]>([]);
+  const [pixEditing, setPixEditing] = useState<Participant | null>(null);
   const [newParticipant, setNewParticipant] = useState('');
   const [expenseFormTarget, setExpenseFormTarget] = useState<ExpenseFormTarget>(null);
   const [codeCopied, setCodeCopied] = useState(false);
@@ -51,15 +97,18 @@ export function GroupPage() {
 
   const load = useCallback(async () => {
     if (!session.token || !code) return;
-    const [p, e, b] = await Promise.all([
+    const [p, e, b, r] = await Promise.all([
       api.getParticipants(code, session.token),
       api.getExpenses(code, session.token),
       api.getBalances(code, session.token),
+      // An API from before monthly expenses answers 404; the page still works.
+      api.getRecurring(code, session.token).catch(() => [] as RecurringExpense[]),
     ]);
     setParticipants(p);
     setExpenses(e);
     setBalances(b.balances);
     setTransfers(b.suggestedTransfers);
+    setRecurring(r);
   }, [code, session.token]);
 
   useEffect(() => {
@@ -84,6 +133,12 @@ export function GroupPage() {
   async function handleMarkPaid(transfer: Transfer) {
     if (!session.token || !code) return;
     await api.recordPayment(code, session.token, transfer.fromId, transfer.toId, transfer.amountCents);
+    void load();
+  }
+
+  async function handleStopRecurring(id: string) {
+    if (!session.token || !code) return;
+    await api.deleteRecurring(code, session.token, id);
     void load();
   }
 
@@ -115,6 +170,9 @@ export function GroupPage() {
   const canEdit = session.role === 'editor';
   const isSettled = balances.every((b) => b.amountCents === 0);
   const totalCents = expenses.reduce((sum, e) => sum + e.amountCents, 0);
+  const participantById = new Map(participants.map((p) => [p.id, p]));
+  // Pix only exists in reais; other currencies just don't get the button.
+  const pixEnabled = currency === 'BRL';
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
@@ -165,13 +223,48 @@ export function GroupPage() {
             <p className="text-[var(--text-muted)]">{t('group.noParticipantsYet')}</p>
           ) : (
             <ul className="flex flex-wrap gap-2">
-              {participants.map((p) => (
-                <li key={p.id} className="flex items-center gap-2 rounded-full bg-[var(--surface-2)] py-1 pl-1 pr-3">
-                  <Avatar name={p.name} size="sm" />
-                  <span className="text-sm font-medium">{p.name}</span>
-                </li>
-              ))}
+              {participants.map((p) => {
+                const chip = (
+                  <>
+                    <Avatar name={p.name} size="sm" />
+                    <span className="text-sm font-medium">{p.name}</span>
+                    {p.pixKey && <KeyRound className="h-3.5 w-3.5 text-teal" aria-label={t('group.setPixKey')} />}
+                  </>
+                );
+                return (
+                  <li key={p.id}>
+                    {canEdit ? (
+                      <button
+                        type="button"
+                        onClick={() => setPixEditing((current) => (current?.id === p.id ? null : p))}
+                        title={t('group.pixKeyOf', { name: p.name })}
+                        className={`flex items-center gap-2 rounded-full border py-1 pl-1 pr-3 transition-colors ${
+                          pixEditing?.id === p.id
+                            ? 'border-teal bg-teal/10'
+                            : 'border-transparent bg-[var(--surface-2)] hover:border-[var(--border)]'
+                        }`}
+                      >
+                        {chip}
+                      </button>
+                    ) : (
+                      <span className="flex items-center gap-2 rounded-full bg-[var(--surface-2)] py-1 pl-1 pr-3">{chip}</span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
+          )}
+          {canEdit && pixEditing && (
+            <PixKeyEditor
+              key={pixEditing.id}
+              code={code}
+              token={session.token!}
+              participant={pixEditing}
+              onDone={() => {
+                setPixEditing(null);
+                void load();
+              }}
+            />
           )}
           {canEdit && (
             <form onSubmit={handleAddParticipant} className="mt-4 flex max-w-sm gap-2">
@@ -190,7 +283,7 @@ export function GroupPage() {
         </Section>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px] lg:items-start">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
         <div className="space-y-6 lg:order-2">
           <Section icon={Scale} title={t('group.balances')}>
             {isSettled ? (
@@ -240,17 +333,26 @@ export function GroupPage() {
                         <Avatar name={tr.toName} size="sm" />
                         <span className="min-w-0 truncate font-medium">{tr.toName}</span>
                       </div>
-                      <div className="mt-2.5 flex items-center justify-between gap-2">
+                      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
                         <span className="font-bold">{formatCents(tr.amountCents, currency, i18n.language)}</span>
-                        {canEdit && (
-                          <Button
-                            variant="secondary"
-                            className="px-3 py-1.5 text-xs"
-                            onClick={() => handleMarkPaid(tr)}
-                          >
-                            {t('group.markAsPaid')}
-                          </Button>
-                        )}
+                        <div className="flex flex-wrap items-center gap-2">
+                          {pixEnabled && participantById.get(tr.toId)?.pixKey && (
+                            <CopyPixButton
+                              pixKey={participantById.get(tr.toId)!.pixKey!}
+                              name={tr.toName}
+                              amountCents={tr.amountCents}
+                            />
+                          )}
+                          {canEdit && (
+                            <Button
+                              variant="secondary"
+                              className="px-3 py-1.5 text-xs"
+                              onClick={() => handleMarkPaid(tr)}
+                            >
+                              {t('group.markAsPaid')}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </li>
                   ))}
@@ -258,6 +360,12 @@ export function GroupPage() {
               </div>
             )}
           </Section>
+
+          {expenses.length > 0 && (
+            <Section icon={ChartPie} title={t('group.spendingByCategory')}>
+              <SpendingByCategory expenses={expenses} currency={currency} />
+            </Section>
+          )}
         </div>
 
         <div className="lg:order-1">
@@ -304,6 +412,39 @@ export function GroupPage() {
               />
             )}
 
+            {recurring.length > 0 && (
+              <div className="mb-5 rounded-xl border border-[var(--border)] p-3">
+                <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                  <Repeat className="h-3.5 w-3.5" />
+                  {t('group.monthlyExpenses')}
+                </h3>
+                <ul className="space-y-1.5">
+                  {recurring.map((r) => (
+                    <li key={r.id} className="flex items-center gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{r.description}</p>
+                        <p className="truncate text-xs text-[var(--text-muted)]">
+                          {t('group.monthlyLine', {
+                            amount: formatCents(r.amountCents, currency, i18n.language),
+                            day: r.dayOfMonth,
+                          })}
+                        </p>
+                      </div>
+                      {canEdit && (
+                        <button
+                          type="button"
+                          onClick={() => handleStopRecurring(r.id)}
+                          className="flex-none rounded-lg px-2 py-1 text-xs font-medium text-[var(--text-muted)] hover:bg-alert/10 hover:text-alert"
+                        >
+                          {t('group.stopRecurring')}
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {expenses.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-12 text-center">
                 <Receipt className="h-8 w-8 text-[var(--text-muted)]" />
@@ -331,16 +472,35 @@ export function GroupPage() {
                     );
                   }
 
-                  const payer = participants.find((p) => p.id === expense.paidById);
+                  const payer = participantById.get(expense.paidById);
+                  const category = categoryOf(expense);
+                  const CategoryIcon = CATEGORY_ICONS[category];
                   return (
                     <li key={expense.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                      {payer && <Avatar name={payer.name} />}
+                      <span
+                        className="flex h-8 w-8 flex-none items-center justify-center rounded-full text-white"
+                        style={{ background: CATEGORY_COLORS[category] }}
+                        title={t(`categories.${category}`)}
+                      >
+                        <CategoryIcon className="h-4 w-4" />
+                      </span>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">{expense.description}</p>
+                        <p className="flex items-center gap-1.5 font-medium">
+                          <span className="truncate">{expense.description}</span>
+                          {expense.recurringId && (
+                            <span className="flex-none rounded-full bg-teal/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-teal">
+                              {t('group.monthlyBadge')}
+                            </span>
+                          )}
+                        </p>
                         {payer && (
                           <p className="truncate text-xs text-[var(--text-muted)]">
+                            {t(`categories.${category}`)} ·{' '}
                             {t('group.expensePaidBySplit', { payer: payer.name, count: expense.shares.length })}
                           </p>
+                        )}
+                        {expense.note && (
+                          <p className="truncate text-xs italic text-[var(--text-muted)]">{expense.note}</p>
                         )}
                       </div>
                       <span className="flex-none font-bold">
@@ -405,6 +565,141 @@ function Section({
       </div>
       {children}
     </section>
+  );
+}
+
+function PixKeyEditor({
+  code,
+  token,
+  participant,
+  onDone,
+}: {
+  code: string;
+  token: string;
+  participant: Participant;
+  onDone: () => void;
+}) {
+  const { t } = useTranslation();
+  const [value, setValue] = useState(participant.pixKey ?? '');
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  async function save(pixKey: string | null) {
+    setError(null);
+    setSaving(true);
+    try {
+      await api.updateParticipantPixKey(code, token, participant.id, pixKey);
+      onDone();
+    } catch (err) {
+      setError(
+        t(err instanceof ApiError && err.message.includes('cpf_not_allowed') ? 'group.pixKeyCpf' : 'group.pixKeyInvalid'),
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        void save(value.trim() || null);
+      }}
+      className="mt-4 max-w-md space-y-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4"
+    >
+      <Field label={t('group.pixKeyOf', { name: participant.name })}>
+        <input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder={t('group.pixKeyPlaceholder')}
+          maxLength={100}
+          autoComplete="off"
+          className="input"
+        />
+      </Field>
+      <p className="text-xs text-[var(--text-muted)]">{t('group.pixKeyHint')}</p>
+      {error && <p className="text-xs text-alert">{error}</p>}
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" disabled={saving}>
+          {t('group.save')}
+        </Button>
+        {participant.pixKey && (
+          <Button type="button" variant="secondary" disabled={saving} onClick={() => void save(null)}>
+            {t('group.removePixKey')}
+          </Button>
+        )}
+        <Button type="button" variant="secondary" onClick={onDone}>
+          {t('group.cancel')}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function CopyPixButton({ pixKey, name, amountCents }: { pixKey: string; name: string; amountCents: number }) {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(buildPixPayload({ key: pixKey, name, amountCents }));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard access can be denied; the key is still visible in the group to copy by hand.
+    }
+  }
+
+  return (
+    <Button
+      variant="secondary"
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"
+      onClick={handleCopy}
+      title={t('group.copyPixHint')}
+    >
+      {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+      {t(copied ? 'group.pixCopied' : 'group.copyPix')}
+    </Button>
+  );
+}
+
+function SpendingByCategory({ expenses, currency }: { expenses: Expense[]; currency: string }) {
+  const { t, i18n } = useTranslation();
+  const totals = new Map<ExpenseCategory, number>();
+  for (const expense of expenses) {
+    const category = categoryOf(expense);
+    totals.set(category, (totals.get(category) ?? 0) + expense.amountCents);
+  }
+  const rows = [...totals].sort((a, b) => b[1] - a[1]);
+  const total = rows.reduce((sum, [, cents]) => sum + cents, 0);
+
+  return (
+    <ul className="space-y-3">
+      {rows.map(([category, cents]) => {
+        const Icon = CATEGORY_ICONS[category];
+        const percent = total > 0 ? Math.round((cents * 100) / total) : 0;
+        return (
+          <li key={category}>
+            <div className="mb-1 flex items-center justify-between gap-2 text-sm">
+              <span className="flex min-w-0 items-center gap-1.5">
+                <Icon className="h-3.5 w-3.5 flex-none" style={{ color: CATEGORY_COLORS[category] }} />
+                <span className="truncate">{t(`categories.${category}`)}</span>
+              </span>
+              <span className="flex-none font-medium">
+                {formatCents(cents, currency, i18n.language)}{' '}
+                <span className="text-xs text-[var(--text-muted)]">· {percent}%</span>
+              </span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-[var(--surface-2)]">
+              <div
+                className="h-full rounded-full"
+                style={{ width: `${Math.max(percent, 2)}%`, background: CATEGORY_COLORS[category] }}
+              />
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
@@ -525,6 +820,13 @@ function ExpenseForm({
   const [description, setDescription] = useState(editingExpense?.description ?? '');
   const [paidById, setPaidById] = useState(editingExpense?.paidById ?? participants[0]?.id ?? '');
   const [splitMode, setSplitMode] = useState<'equal' | 'custom'>(editingExpense ? 'custom' : 'equal');
+  const [category, setCategory] = useState<ExpenseCategory>(editingExpense ? categoryOf(editingExpense) : 'other');
+  const [note, setNote] = useState(editingExpense?.note ?? '');
+  const [repeatMonthly, setRepeatMonthly] = useState(false);
+  const [dayOfMonth, setDayOfMonth] = useState(() => Math.min(new Date().getDate(), 28));
+  const [error, setError] = useState<string | null>(null);
+  // Monthly expenses split equally (see the API's createRecurringSchema).
+  const monthly = !editingExpense && splitMode === 'equal' && repeatMonthly;
 
   const [amount, setAmount] = useState(editingExpense ? centsToAmountString(editingExpense.amountCents) : '');
   const [splitAmong, setSplitAmong] = useState<string[]>(
@@ -568,25 +870,46 @@ function ExpenseForm({
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    setError(null);
 
     let payload: ExpenseInput;
     if (splitMode === 'equal') {
       if (!amountCents || splitAmong.length === 0) return;
-      payload = { description, amountCents, paidById, participantIds: splitAmong };
+      payload = { description, amountCents, paidById, category, note, participantIds: splitAmong };
     } else {
       const shares = participants
         .map((p) => ({ participantId: p.id, shareCents: parseAmountToCents(customAmounts[p.id] ?? '') }))
         .filter((s) => s.shareCents > 0);
       if (shares.length === 0) return;
-      payload = { description, amountCents: shares.reduce((sum, s) => sum + s.shareCents, 0), paidById, shares };
+      payload = {
+        description,
+        amountCents: shares.reduce((sum, s) => sum + s.shareCents, 0),
+        paidById,
+        category,
+        note,
+        shares,
+      };
     }
 
-    if (editingExpense) {
-      await api.updateExpense(code, token, editingExpense.id, payload);
-    } else {
-      await api.createExpense(code, token, payload);
+    try {
+      if (monthly) {
+        await api.createRecurring(code, token, {
+          description,
+          amountCents,
+          paidById,
+          participantIds: splitAmong,
+          category,
+          dayOfMonth,
+        });
+      } else if (editingExpense) {
+        await api.updateExpense(code, token, editingExpense.id, payload);
+      } else {
+        await api.createExpense(code, token, payload);
+      }
+      onDone();
+    } catch (err) {
+      setError(t('group.limitReached', { error: err instanceof Error ? err.message : '' }));
     }
-    onDone();
   }
 
   return (
@@ -598,8 +921,33 @@ function ExpenseForm({
           onChange={(e) => setDescription(e.target.value)}
           placeholder={t('group.descriptionPlaceholder')}
           className="input"
+          maxLength={200}
         />
       </Field>
+
+      <div>
+        <p className="mb-1.5 text-sm font-medium text-[var(--text-muted)]">{t('group.category')}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {EXPENSE_CATEGORIES.map((option) => {
+            const Icon = CATEGORY_ICONS[option];
+            const selected = category === option;
+            return (
+              <button
+                type="button"
+                key={option}
+                onClick={() => setCategory(option)}
+                aria-pressed={selected}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                  selected ? 'border-teal bg-teal/10 text-teal' : 'border-[var(--border)] bg-[var(--surface)]'
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" style={selected ? undefined : { color: CATEGORY_COLORS[option] }} />
+                {t(`categories.${option}`)}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       <Field label={t('group.paidBy')}>
         <select value={paidById} onChange={(e) => setPaidById(e.target.value)} className="input">
@@ -705,6 +1053,53 @@ function ExpenseForm({
           </>
         )}
       </div>
+
+      {!editingExpense && splitMode === 'equal' && (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
+          <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
+            <input
+              type="checkbox"
+              checked={repeatMonthly}
+              onChange={(e) => setRepeatMonthly(e.target.checked)}
+              className="h-4 w-4 accent-teal"
+            />
+            <Repeat className="h-4 w-4 text-teal" />
+            {t('group.repeatMonthly')}
+          </label>
+          {repeatMonthly && (
+            <div className="mt-2.5 space-y-2">
+              <p className="text-xs text-[var(--text-muted)]">{t('group.repeatMonthlyHint')}</p>
+              <Field label={t('group.dayOfMonth')}>
+                <select
+                  value={dayOfMonth}
+                  onChange={(e) => setDayOfMonth(Number(e.target.value))}
+                  className="input w-28"
+                >
+                  {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
+                    <option key={day} value={day}>
+                      {day}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!monthly && (
+        <Field label={t('group.note')}>
+          <input
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder={t('group.notePlaceholder')}
+            maxLength={140}
+            className="input"
+          />
+        </Field>
+      )}
+
+      {error && <p className="text-sm text-alert">{error}</p>}
 
       <div className="flex gap-2">
         <Button type="submit" disabled={!isValid} className="flex-1 sm:flex-none">
