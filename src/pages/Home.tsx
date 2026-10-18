@@ -106,13 +106,13 @@ export function Home() {
 
   return (
     <div>
-      <div className="mx-auto max-w-6xl px-5 pt-6 sm:px-8">
-        <p className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-sm">
-          Demonstração interativa. Grupos, despesas e pagamentos são salvos apenas neste navegador. Links compartilhados só mostram dados em outro navegador se forem criados nele.
-          {' '}<button type="button" className="underline" onClick={() => navigate('/admin/login')}>Explorar painel administrativo da demo</button>
-        </p>
+      <div className="mx-auto max-w-6xl px-5 pt-4 sm:px-8 sm:pt-6">
+        <div className="flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:p-4">
+          <p className="leading-relaxed text-[var(--text-muted)]"><strong className="text-[var(--text)]">Demonstração interativa.</strong> Crie grupos e registre despesas neste navegador. Links compartilhados não transferem os dados para outros navegadores.</p>
+          <button type="button" className="shrink-0 self-start rounded-lg border border-[var(--border)] px-3 py-2 font-semibold transition-colors hover:bg-[var(--surface-2)] sm:self-auto" onClick={() => navigate('/admin/login')}>Explorar painel administrativo</button>
+        </div>
       </div>
-      <div className="mx-auto grid max-w-6xl items-start gap-10 px-5 py-10 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-20">
+      <div className="mx-auto grid max-w-6xl items-start gap-7 px-5 py-8 sm:px-8 sm:py-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-20">
         <motion.div
           variants={heroContainer}
           initial="hidden"
@@ -149,7 +149,7 @@ export function Home() {
             ))}
           </motion.ul>
 
-          <motion.div variants={heroItem}>
+          <motion.div variants={heroItem} className="hidden lg:block">
             <ReceiptDemo />
           </motion.div>
         </motion.div>
