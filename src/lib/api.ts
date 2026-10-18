@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL;
+import { demoRequest } from './demoBackend';
 
 export class ApiError extends Error {
   status: number;
@@ -10,21 +10,7 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, {
-    ...options,
-    credentials: 'include',
-    // A Content-Type: application/json header with no body makes Fastify's
-    // JSON parser reject the request, so only send it when there is a body.
-    headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers },
-  });
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new ApiError(body.error ?? 'Request failed', response.status);
-  }
-
-  if (response.status === 204) return undefined as T;
-  return response.json();
+  return demoRequest<T>(path, options);
 }
 
 function authHeaders(token: string): HeadersInit {

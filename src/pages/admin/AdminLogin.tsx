@@ -51,6 +51,7 @@ export function AdminLogin() {
         <Logo className="h-8 w-auto" />
       </div>
       <form onSubmit={tempToken ? handleVerify : handleLogin} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
+        <p className="text-sm">Painel de demonstração local. Use qualquer e-mail e senha para explorar dados fictícios deste navegador.</p>
         {tempToken ? (
           <input
             required

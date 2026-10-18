@@ -2,21 +2,14 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <!--
-      This meta CSP is a fallback for whichever deployment can't set real HTTP
-      headers (GitHub Pages can't at all). The Hostinger deploy sets a proper
-      CSP header via public/.htaccess instead — browsers enforce the
-      intersection of both, so connect-src lists every API this app has
-      talked to across deployments, not just the current one's.
-    -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://rachai-api-production.up.railway.app https://api.userachai.com.br; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+      content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
     />
-    <script src="/spa-redirect-restore.js"></script>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="alternate icon" type="image/png" href="/favicon-32.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <script src="%BASE_URL%spa-redirect-restore.js"></script>
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <link rel="alternate icon" type="image/png" href="%BASE_URL%favicon-32.png" />
+    <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#14B8A6" />
 
@@ -33,7 +26,7 @@
       property="og:description"
       content="Crie um grupo, lance as despesas e descubra em segundos quem deve pagar quem, sem cadastro."
     />
-    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image" content="%BASE_URL%og-image.png" />
     <meta property="og:locale" content="pt_BR" />
 
     <meta name="twitter:card" content="summary_large_image" />
@@ -42,9 +35,9 @@
       name="twitter:description"
       content="Crie um grupo, lance as despesas e descubra em segundos quem deve pagar quem, sem cadastro."
     />
-    <meta name="twitter:image" content="/og-image.png" />
+    <meta name="twitter:image" content="%BASE_URL%og-image.png" />
 
-    <script src="/theme-init.js"></script>
+    <script src="%BASE_URL%theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>

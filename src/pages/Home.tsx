@@ -106,6 +106,12 @@ export function Home() {
 
   return (
     <div>
+      <div className="mx-auto max-w-6xl px-5 pt-6 sm:px-8">
+        <p className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-sm">
+          Demonstração interativa. Grupos, despesas e pagamentos são salvos apenas neste navegador. Links compartilhados só mostram dados em outro navegador se forem criados nele.
+          {' '}<button type="button" className="underline" onClick={() => navigate('/admin/login')}>Explorar painel administrativo da demo</button>
+        </p>
+      </div>
       <div className="mx-auto grid max-w-6xl items-start gap-10 px-5 py-10 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-20">
         <motion.div
           variants={heroContainer}

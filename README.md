@@ -1,8 +1,8 @@
 # Rachai Web
 
-Frontend for Rachai, a group bill-splitting app. Create a group in the
-currency of your choice, share the code and PIN, log expenses together, and
-see who owes whom.
+Interactive GitHub Pages demo for Rachai, a group bill-splitting app. Create a
+group, log expenses and settle balances in your browser. Demo data stays in
+localStorage; invite links work only in the browser where the group was created.
 
 ## Stack
 
@@ -15,13 +15,11 @@ see who owes whom.
 ## Prerequisites
 
 - Node.js 20+
-- A running [rachai-api](../rachai-api) instance
 
 ## Running locally
 
 ```bash
 npm install
-cp .env.example .env   # set VITE_API_URL to your backend URL
 npm run dev
 ```
 
@@ -36,5 +34,5 @@ npm test
 Built as a static site and deployed to GitHub Pages via GitHub Actions:
 **https://lucianookdp.github.io/rachai-web/**
 
-`VITE_API_URL` and `VITE_BASE_PATH` are set as repository variables and read
-by the deploy workflow at build time.
+`VITE_BASE_PATH` is read by the deploy workflow at build time. No API or
+Railway service is used by the Pages demo.
